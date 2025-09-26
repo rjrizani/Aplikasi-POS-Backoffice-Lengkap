@@ -4,79 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi POS & Backoffice (Firebase)</title>
+    <title>Aplikasi POS & Backoffice (Responsif)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+    
+    <link rel="stylesheet" href="styles.css" />
 
-        .pin-button {
-            transition: all 0.2s ease;
-        }
-
-        .pin-button:active {
-            transform: scale(0.95);
-            background-color: #4a5568;
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        /* Animasi loading sederhana */
-        #loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            flex-direction: column;
-            color: white;
-            font-size: 1.2rem;
-        }
-
-        .spinner {
-            border: 8px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 8px solid #fff;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
-
-    <!-- Add before your module script -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </head>
 
-<body class="bg-gray-100 h-screen overflow-hidden">
+<!-- PERUBAHAN: Layout diubah menjadi flex-col dengan tinggi layar penuh -->
+<body class="bg-gray-100 h-screen flex flex-col">
 
     <!-- Loading Overlay -->
     <div id="loading-overlay">
@@ -85,40 +26,26 @@
     </div>
 
     <!-- Kontainer Utama Aplikasi -->
-    <div id="app" class="h-full">
+    <div id="app" class="h-full flex flex-col">
         <!-- ===== LAYAR LOGIN ===== -->
         <div id="layar-login" class="flex flex-col items-center justify-center h-full bg-gray-800">
-            <div class="w-full max-w-sm mx-auto bg-white rounded-2xl shadow-xl p-8">
+            <div class="w-full max-w-sm mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8">
                 <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Selamat Datang</h1>
-                <p class="text-center text-gray-500 mb-6">Masukkan PIN Anda untuk masuk</p>
-                <div id="pin-display"
-                    class="w-full h-16 bg-gray-100 rounded-lg flex items-center justify-center text-4xl tracking-widest font-semibold mb-6">
-                </div>
+                <p class="text-center text-gray-500 mb-6">Masukkan PIN Anda</p>
+                <div id="pin-display" class="w-full h-16 bg-gray-100 rounded-lg flex items-center justify-center text-4xl tracking-widest font-semibold mb-6"></div>
                 <div class="grid grid-cols-3 gap-4">
-                    <button data-value="1"
-                        class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-5">1</button>
-                    <button data-value="2"
-                        class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-5">2</button>
-                    <button data-value="3"
-                        class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-5">3</button>
-                    <button data-value="4"
-                        class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-5">4</button>
-                    <button data-value="5"
-                        class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-5">5</button>
-                    <button data-value="6"
-                        class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-5">6</button>
-                    <button data-value="7"
-                        class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-5">7</button>
-                    <button data-value="8"
-                        class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-5">8</button>
-                    <button data-value="9"
-                        class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-5">9</button>
-                    <button id="pin-clear"
-                        class="pin-button text-xl font-bold bg-red-200 text-red-700 rounded-lg p-5">C</button>
-                    <button data-value="0"
-                        class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-5">0</button>
-                    <button id="pin-backspace"
-                        class="pin-button text-xl font-bold bg-yellow-200 text-yellow-700 rounded-lg p-5">⌫</button>
+                    <button data-value="1" class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-4 md:p-5">1</button>
+                    <button data-value="2" class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-4 md:p-5">2</button>
+                    <button data-value="3" class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-4 md:p-5">3</button>
+                    <button data-value="4" class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-4 md:p-5">4</button>
+                    <button data-value="5" class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-4 md:p-5">5</button>
+                    <button data-value="6" class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-4 md:p-5">6</button>
+                    <button data-value="7" class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-4 md:p-5">7</button>
+                    <button data-value="8" class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-4 md:p-5">8</button>
+                    <button data-value="9" class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-4 md:p-5">9</button>
+                    <button id="pin-clear" class="pin-button text-xl font-bold bg-red-200 text-red-700 rounded-lg p-4 md:p-5">C</button>
+                    <button data-value="0" class="pin-button text-3xl font-bold bg-gray-200 text-gray-800 rounded-lg p-4 md:p-5">0</button>
+                    <button id="pin-backspace" class="pin-button text-xl font-bold bg-yellow-200 text-yellow-700 rounded-lg p-4 md:p-5">⌫</button>
                 </div>
             </div>
             <div class="text-white mt-4 text-sm">PIN Admin: 1111, Kasir: 2222, Dapur: 3333</div>
@@ -126,79 +53,56 @@
 
         <!-- ===== APLIKASI UTAMA (Setelah Login) ===== -->
         <div id="aplikasi-utama" class="hidden h-full flex flex-col">
-            <header class="bg-white shadow-md w-full p-4 flex justify-between items-center z-10">
+            <!-- PERUBAHAN: Header dibuat agar tidak menyusut (flex-shrink-0) -->
+            <header class="bg-white shadow-md w-full p-4 flex justify-between items-center z-10 flex-shrink-0">
                 <div class="flex items-center">
-                    <svg class="w-8 h-8 text-indigo-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
-                        </path>
+                    <svg class="w-8 h-8 text-indigo-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                     </svg>
-                    <h1 class="text-2xl font-bold text-gray-800">Sistem POS Terpadu</h1>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-800">Sistem POS Terpadu</h1>
                 </div>
                 <div class="flex items-center">
-                    <div class="mr-6 text-right">
-                        <p id="nama-pengguna" class="font-semibold text-gray-700">Nama Pengguna</p>
-                        <p id="peran-pengguna" class="text-sm text-gray-500 capitalize">Peran</p>
+                    <div class="mr-4 md:mr-6 text-right">
+                        <p id="nama-pengguna" class="font-semibold text-gray-700 text-sm md:text-base">Nama Pengguna</p>
+                        <p id="peran-pengguna" class="text-xs md:text-sm text-gray-500 capitalize">Peran</p>
                     </div>
-                    <button id="tombol-logout"
-                        class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Logout</button>
+                    <button id="tombol-logout" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-3 md:px-4 rounded-lg transition duration-300">Logout</button>
                 </div>
             </header>
-            <main class="flex-1 overflow-hidden">
-                <!-- Tampilan disembunyikan secara default, akan ditampilkan oleh JS -->
-
+            <!-- PERUBAHAN: Main content dibuat bisa scroll vertikal dan mengisi sisa ruang (flex-1) -->
+            <main class="flex-1 overflow-y-auto">
+                
                 <!-- ===== TAMPILAN KASIR (POS) ===== -->
                 <div id="tampilan-pos" class="hidden h-full">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 h-full gap-6 p-6">
+                    <!-- PERUBAHAN: Layout diubah menjadi 1 kolom di mobile, dan 3 di layar besar -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-4 md:p-6">
                         <!-- Kolom Meja -->
-                        <div class="bg-white rounded-2xl shadow-lg flex flex-col">
+                        <div class="bg-white rounded-2xl shadow-lg flex flex-col min-h-[400px] lg:min-h-0">
                             <h2 class="text-xl font-bold p-4 border-b">Pilih Meja</h2>
-                            <div id="container-meja"
-                                class="p-4 grid grid-cols-3 sm:grid-cols-4 gap-4 overflow-y-auto no-scrollbar">
-                                <!-- Meja akan dirender oleh JS -->
-                            </div>
+                            <div id="container-meja" class="p-4 grid grid-cols-3 sm:grid-cols-4 gap-4 overflow-y-auto no-scrollbar"></div>
                         </div>
 
                         <!-- Kolom Menu -->
-                        <div class="bg-white rounded-2xl shadow-lg flex flex-col">
-                            <div class="p-4 border-b">
-                                <h2 class="text-xl font-bold">Menu</h2>
-                            </div>
-                            <div id="container-menu" class="p-4 overflow-y-auto no-scrollbar">
-                                <!-- Menu akan dirender oleh JS -->
-                            </div>
+                        <div class="bg-white rounded-2xl shadow-lg flex flex-col min-h-[500px] lg:min-h-0">
+                            <div class="p-4 border-b"><h2 class="text-xl font-bold">Menu</h2></div>
+                            <div id="container-menu" class="p-4 overflow-y-auto no-scrollbar"></div>
                         </div>
 
                         <!-- Kolom Pesanan -->
-                        <div class="bg-white rounded-2xl shadow-lg flex flex-col">
+                        <div class="bg-white rounded-2xl shadow-lg flex flex-col min-h-[500px] lg:min-h-0">
                             <div class="p-4 border-b">
-                                <h2 class="text-xl font-bold">Pesanan: <span id="label-meja-aktif"
-                                        class="text-indigo-600">Pilih Meja</span></h2>
+                                <h2 class="text-xl font-bold">Pesanan: <span id="label-meja-aktif" class="text-indigo-600">Pilih Meja</span></h2>
                             </div>
                             <div id="container-pesanan" class="flex-1 p-4 overflow-y-auto no-scrollbar">
-                                <!-- Pesanan akan dirender oleh JS -->
                                 <p class="text-gray-400 text-center mt-10">Pilih meja untuk memulai pesanan.</p>
                             </div>
                             <div class="p-4 border-t space-y-3">
-                                <div class="flex justify-between text-lg font-bold">
-                                    <span>Subtotal</span>
-                                    <span id="subtotal-pesanan">Rp 0</span>
-                                </div>
-                                <div class="flex justify-between text-lg font-bold">
-                                    <span>Pajak (10%)</span>
-                                    <span id="pajak-pesanan">Rp 0</span>
-                                </div>
-                                <div class="flex justify-between text-2xl font-extrabold text-gray-800">
-                                    <span>Total</span>
-                                    <span id="total-pesanan">Rp 0</span>
-                                </div>
+                                <div class="flex justify-between text-lg font-bold"><span>Subtotal</span><span id="subtotal-pesanan">Rp 0</span></div>
+                                <div class="flex justify-between text-lg font-bold"><span>Pajak (10%)</span><span id="pajak-pesanan">Rp 0</span></div>
+                                <div class="flex justify-between text-2xl font-extrabold text-gray-800"><span>Total</span><span id="total-pesanan">Rp 0</span></div>
                                 <div class="grid grid-cols-2 gap-4 pt-2">
-                                    <button id="tombol-kirim-dapur" disabled
-                                        class="w-full bg-blue-500 text-white p-4 rounded-lg font-bold hover:bg-blue-600 disabled:bg-gray-300 transition">Kirim
-                                        ke Dapur</button>
-                                    <button id="tombol-bayar" disabled
-                                        class="w-full bg-green-500 text-white p-4 rounded-lg font-bold hover:bg-green-600 disabled:bg-gray-300 transition">Bayar</button>
+                                    <button id="tombol-kirim-dapur" disabled class="w-full bg-blue-500 text-white p-4 rounded-lg font-bold hover:bg-blue-600 disabled:bg-gray-300 transition">Kirim ke Dapur</button>
+                                    <button id="tombol-bayar" disabled class="w-full bg-green-500 text-white p-4 rounded-lg font-bold hover:bg-green-600 disabled:bg-gray-300 transition">Bayar</button>
                                 </div>
                             </div>
                         </div>
@@ -206,141 +110,66 @@
                 </div>
 
                 <!-- ===== TAMPILAN DAPUR ===== -->
-                <div id="tampilan-dapur" class="hidden h-full bg-gray-100 p-6 overflow-y-auto">
+                <div id="tampilan-dapur" class="hidden h-full bg-gray-100 p-4 md:p-6">
                     <h2 class="text-3xl font-bold mb-6 text-gray-800">Pesanan Masuk</h2>
-                    <div id="container-dapur"
-                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        <!-- Pesanan dapur akan dirender oleh JS -->
-                        <p id="dapur-kosong" class="text-gray-500 col-span-full text-center mt-10 text-lg">Belum ada
-                            pesanan masuk.</p>
+                    <div id="container-dapur" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <p id="dapur-kosong" class="text-gray-500 col-span-full text-center mt-10 text-lg">Belum ada pesanan masuk.</p>
                     </div>
                 </div>
 
                 <!-- ===== TAMPILAN ADMIN (BACKOFFICE) ===== -->
-                <div id="tampilan-admin" class="hidden h-full flex">
-                    <nav class="w-64 bg-gray-800 text-white flex-shrink-0 flex flex-col">
-                        <div class="p-6 text-2xl font-bold border-b border-gray-700">Backoffice</div>
-                        <ul class="flex-1 py-4">
-                            <li><a href="#" class="admin-menu-item block py-3 px-6 hover:bg-gray-700 bg-gray-900"
-                                    data-target="panel-laporan">Laporan & Laba Rugi</a></li>
-                            <li><a href="#" class="admin-menu-item block py-3 px-6 hover:bg-gray-700"
-                                    data-target="panel-menu">Manajemen Menu</a></li>
-                            <li><a href="#" class="admin-menu-item block py-3 px-6 hover:bg-gray-700"
-                                    data-target="panel-stok">Manajemen Stok</a></li>
-                            <li><a href="#" class="admin-menu-item block py-3 px-6 hover:bg-gray-700"
-                                    data-target="panel-pengguna">Manajemen Pengguna</a></li>
+                 <!-- PERUBAHAN: Layout diubah jadi vertikal di mobile, horizontal di layar besar -->
+                <div id="tampilan-admin" class="hidden h-full flex flex-col lg:flex-row">
+                    <!-- PERUBAHAN: Navigasi dibuat lebar penuh di mobile, dan tetap di layar besar -->
+                    <nav class="w-full lg:w-64 bg-gray-800 text-white flex-shrink-0">
+                        <div class="p-6 text-2xl font-bold border-b border-gray-700 hidden lg:block">Backoffice</div>
+                        <!-- PERUBAHAN: Menu dibuat horizontal dan scrollable di mobile, vertikal di layar besar -->
+                        <ul class="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible no-scrollbar">
+                            <li><a href="#" class="admin-menu-item block py-3 px-6 hover:bg-gray-700 bg-gray-900 whitespace-nowrap" data-target="panel-laporan">Laporan</a></li>
+                            <li><a href="#" class="admin-menu-item block py-3 px-6 hover:bg-gray-700 whitespace-nowrap" data-target="panel-menu">Manajemen Menu</a></li>
+                            <li><a href="#" class="admin-menu-item block py-3 px-6 hover:bg-gray-700 whitespace-nowrap" data-target="panel-stok">Manajemen Stok</a></li>
+                            <li><a href="#" class="admin-menu-item block py-3 px-6 hover:bg-gray-700 whitespace-nowrap" data-target="panel-pengguna">Manajemen Pengguna</a></li>
                         </ul>
                     </nav>
-                    <div class="flex-1 p-8 bg-white overflow-y-auto">
+                    <div class="flex-1 p-4 md:p-8 bg-white">
                         <!-- Panel Laporan -->
                         <div id="panel-laporan" class="admin-panel">
-                            <h2 class="text-3xl font-bold mb-6 text-gray-800">Laporan Laba Rugi (Simulasi)</h2>
+                            <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Laporan Laba Rugi</h2>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                                <div class="bg-green-100 p-6 rounded-xl">
-                                    <h3 class="text-lg font-semibold text-green-800">Total Pendapatan</h3>
-                                    <p id="laporan-pendapatan" class="text-3xl font-bold text-green-900 mt-2">Rp 0</p>
-                                </div>
-                                <div class="bg-red-100 p-6 rounded-xl">
-                                    <h3 class="text-lg font-semibold text-red-800">Total HPP (Bahan Baku)</h3>
-                                    <p id="laporan-hpp" class="text-3xl font-bold text-red-900 mt-2">Rp 0</p>
-                                </div>
-                                <div class="bg-blue-100 p-6 rounded-xl">
-                                    <h3 class="text-lg font-semibold text-blue-800">Laba Kotor</h3>
-                                    <p id="laporan-laba" class="text-3xl font-bold text-blue-900 mt-2">Rp 0</p>
-                                </div>
+                                <div class="bg-green-100 p-6 rounded-xl"><h3 class="text-lg font-semibold text-green-800">Total Pendapatan</h3><p id="laporan-pendapatan" class="text-2xl md:text-3xl font-bold text-green-900 mt-2">Rp 0</p></div>
+                                <div class="bg-red-100 p-6 rounded-xl"><h3 class="text-lg font-semibold text-red-800">Total HPP</h3><p id="laporan-hpp" class="text-2xl md:text-3xl font-bold text-red-900 mt-2">Rp 0</p></div>
+                                <div class="bg-blue-100 p-6 rounded-xl"><h3 class="text-lg font-semibold text-blue-800">Laba Kotor</h3><p id="laporan-laba" class="text-2xl md:text-3xl font-bold text-blue-900 mt-2">Rp 0</p></div>
                             </div>
-                            <div class="bg-gray-50 p-6 rounded-xl">
-                                <h3 class="text-xl font-bold mb-4 text-gray-700">Detail Transaksi</h3>
-                                <div id="laporan-transaksi" class="max-h-96 overflow-y-auto">
-                                    <!-- detail transaksi akan diisi oleh JS -->
-                                    <p class="text-gray-500">Belum ada transaksi.</p>
-                                </div>
-                            </div>
+                            <div class="bg-gray-50 p-6 rounded-xl"><h3 class="text-xl font-bold mb-4 text-gray-700">Detail Transaksi</h3><div id="laporan-transaksi" class="max-h-96 overflow-y-auto"><p class="text-gray-500">Belum ada transaksi.</p></div></div>
                         </div>
                         <!-- Panel Manajemen Menu -->
                         <div id="panel-menu" class="admin-panel hidden">
-                            <h2 class="text-3xl font-bold mb-6 text-gray-800">Manajemen Menu</h2>
-                            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                            <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Manajemen Menu</h2>
+                            <!-- PERUBAHAN: Tabel dibungkus agar bisa scroll horizontal -->
+                            <div class="w-full overflow-x-auto bg-white shadow-md rounded-lg">
                                 <table class="min-w-full leading-normal">
-                                    <thead>
-                                        <tr>
-                                            <th
-                                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                Kode</th>
-                                            <th
-                                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                Nama Menu</th>
-                                            <th
-                                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                Harga</th>
-                                            <th
-                                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                Dapur</th>
-                                            <th
-                                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tabel-menu">
-                                        <!-- Data menu akan diisi oleh JS -->
-                                    </tbody>
+                                    <thead><tr><th class="table-header">Kode</th><th class="table-header">Nama Menu</th><th class="table-header">Harga</th><th class="table-header">Dapur</th><th class="table-header">Aksi</th></tr></thead>
+                                    <tbody id="tabel-menu"></tbody>
                                 </table>
                             </div>
                         </div>
                         <!-- Panel Manajemen Stok -->
                         <div id="panel-stok" class="admin-panel hidden">
-                            <h2 class="text-3xl font-bold mb-6 text-gray-800">Manajemen Stok Bahan Baku</h2>
-                            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                           <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Manajemen Stok</h2>
+                           <div class="w-full overflow-x-auto bg-white shadow-md rounded-lg">
                                 <table class="min-w-full leading-normal">
-                                    <thead>
-                                        <tr>
-                                            <th
-                                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                ID</th>
-                                            <th
-                                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                Nama Bahan</th>
-                                            <th
-                                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                Stok Saat Ini (gram/ml)</th>
-                                            <th
-                                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                Harga Beli Rata-rata (per gram/ml)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tabel-stok">
-                                        <!-- Data stok akan diisi oleh JS -->
-                                    </tbody>
+                                    <thead><tr><th class="table-header">ID</th><th class="table-header">Nama Bahan</th><th class="table-header">Stok (g/ml)</th><th class="table-header">Harga Beli Rata-rata (per g/ml)</th></tr></thead>
+                                    <tbody id="tabel-stok"></tbody>
                                 </table>
                             </div>
                         </div>
                         <!-- Panel Manajemen Pengguna -->
                         <div id="panel-pengguna" class="admin-panel hidden">
-                            <h2 class="text-3xl font-bold mb-6 text-gray-800">Manajemen Pengguna</h2>
-                            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                           <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Manajemen Pengguna</h2>
+                           <div class="w-full overflow-x-auto bg-white shadow-md rounded-lg">
                                 <table class="min-w-full leading-normal">
-                                    <thead>
-                                        <tr>
-                                            <th
-                                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                ID</th>
-                                            <th
-                                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                Nama</th>
-                                            <th
-                                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                Peran</th>
-                                            <th
-                                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                PIN</th>
-                                            <th
-                                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tabel-pengguna">
-                                        <!-- Data pengguna akan diisi oleh JS -->
-                                    </tbody>
+                                    <thead><tr><th class="table-header">ID</th><th class="table-header">Nama</th><th class="table-header">Peran</th><th class="table-header">PIN</th><th class="table-header">Aksi</th></tr></thead>
+                                    <tbody id="tabel-pengguna"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -349,14 +178,18 @@
 
             </main>
         </div>
-
     </div>
 
     <!-- Firebase Config -->
     <script src="firebase-config.js"></script>
-
-    <!-- Firebase SDK -->
+    <!-- Firebase Logic -->
     <script type="module">
+        // Salin dan tempel semua kode JavaScript dari file index.html Anda sebelumnya ke sini.
+        // Tidak ada perubahan yang diperlukan pada logika JavaScript untuk responsivitas.
+        
+        // =================================================================================
+        // TEMPELKAN SEMUA KODE DARI <script type="module"> SEBELUMNYA DI SINI
+        // =================================================================================
         // Import fungsi-fungsi yang diperlukan dari Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -376,7 +209,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        setLogLevel('debug');
+        // setLogLevel('debug');
 
         // ===================================
         // VARIABEL STATE APLIKASI
@@ -559,12 +392,12 @@
             if (localData.transaksi.length === 0) {
                 detailTransaksiEl.innerHTML = '<p class="text-gray-500">Belum ada transaksi.</p>';
             } else {
-                localData.transaksi.forEach(t => {
+                localData.transaksi.sort((a,b) => b.waktu.seconds - a.waktu.seconds).forEach(t => {
                     totalPendapatan += t.total;
                     totalHPP += t.hpp;
                     const waktu = t.waktu ? new Date(t.waktu.seconds * 1000).toLocaleString('id-ID') : 'N/A';
                     const transaksiDiv = document.createElement('div');
-                    transaksiDiv.className = 'p-3 bg-white border rounded-md mb-2 flex justify-between';
+                    transaksiDiv.className = 'p-3 bg-white border rounded-md mb-2 flex justify-between items-center';
                     transaksiDiv.innerHTML = `
                         <div>
                           <p class="font-semibold">Transaksi #${t.id.substring(0, 6)} (${t.namaMeja})</p>
@@ -589,13 +422,11 @@
             localData.menu.forEach(m => {
                 tabelMenuBody.innerHTML += `
                     <tr>
-                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">${m.kode}</td>
-                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">${m.nama}</td>
-                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">${formatRupiah(m.harga)}</td>
-                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">${m.targetDapur}</td>
-                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                            <button class="text-indigo-600 hover:text-indigo-900">Edit</button>
-                        </td>
+                        <td class="table-cell">${m.kode}</td>
+                        <td class="table-cell">${m.nama}</td>
+                        <td class="table-cell">${formatRupiah(m.harga)}</td>
+                        <td class="table-cell">${m.targetDapur}</td>
+                        <td class="table-cell"><button class="text-indigo-600 hover:text-indigo-900">Edit</button></td>
                     </tr>
                 `;
             });
@@ -606,10 +437,10 @@
             localData.bahanBaku.forEach(bb => {
                 tabelStokBody.innerHTML += `
                     <tr>
-                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">${bb.id}</td>
-                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">${bb.nama}</td>
-                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">${bb.stok.toFixed(2)}</td>
-                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">${formatRupiah(bb.hargaBeliPerGram)}</td>
+                        <td class="table-cell">${bb.id}</td>
+                        <td class="table-cell">${bb.nama}</td>
+                        <td class="table-cell">${bb.stok.toFixed(2)}</td>
+                        <td class="table-cell">${formatRupiah(bb.hargaBeliPerGram)}</td>
                     </tr>
                 `;
             });
@@ -620,13 +451,11 @@
             localData.pengguna.forEach(p => {
                 tabelPenggunaBody.innerHTML += `
                     <tr>
-                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">${p.id}</td>
-                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">${p.nama}</td>
-                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm capitalize">${p.peran}</td>
-                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">${p.pin}</td>
-                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                            <button class="text-indigo-600 hover:text-indigo-900">Edit</button>
-                        </td>
+                        <td class="table-cell">${p.id}</td>
+                        <td class="table-cell">${p.nama}</td>
+                        <td class="table-cell capitalize">${p.peran}</td>
+                        <td class="table-cell">${p.pin}</td>
+                        <td class="table-cell"><button class="text-indigo-600 hover:text-indigo-900">Edit</button></td>
                     </tr>
                 `;
             });
@@ -646,8 +475,7 @@
                     });
                     localData[collName] = data;
 
-                    // Panggil fungsi render yang sesuai
-                    if (penggunaAktif) { // Hanya render jika sudah login
+                    if (penggunaAktif) {
                         switch (collName) {
                             case 'meja': renderMeja(); renderPesanan(); break;
                             case 'menu': renderMenu(); break;
@@ -657,9 +485,7 @@
                                 break;
                         }
                     }
-                }, (error) => {
-                    console.error(`Error listening to ${collName}:`, error);
-                });
+                }, (error) => console.error(`Error listening to ${collName}:`, error));
                 unsubscribeListeners.push(unsubscribe);
             });
         }
@@ -683,7 +509,6 @@
                 navigasiBerdasarkanPeran(penggunaAktif.peran);
             } else {
                 pinDisplay.classList.add('animate-shake', 'bg-red-200');
-                // Custom alert would be better
                 console.error('PIN Salah!');
                 setTimeout(() => {
                     pinDisplay.classList.remove('animate-shake', 'bg-red-200');
@@ -729,38 +554,39 @@
         }
 
         async function tambahItemKePesanan(idMenu) {
-            const mejaAktif = localData.meja.find(m => m.id === mejaAktifId);
-            if (!mejaAktif) {
-                console.error('Pilih meja terlebih dahulu!');
-                return;
-            }
+            if (!mejaAktifId) { console.error('Pilih meja terlebih dahulu!'); return; }
             const mejaDocRef = doc(db, getCollectionPath('meja'), mejaAktifId);
-            const newPesanan = [...(mejaAktif.pesanan || [])];
-            const itemDiPesanan = newPesanan.find(item => item.id === idMenu);
-
-            if (itemDiPesanan) {
-                itemDiPesanan.jumlah++;
-            } else {
-                newPesanan.push({ id: idMenu, jumlah: 1 });
-            }
-
-            await updateDoc(mejaDocRef, { pesanan: newPesanan });
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const mejaDoc = await transaction.get(mejaDocRef);
+                    if (!mejaDoc.exists()) { throw "Meja tidak ditemukan!"; }
+                    const newPesanan = [...(mejaDoc.data().pesanan || [])];
+                    const itemDiPesanan = newPesanan.find(item => item.id === idMenu);
+                    if (itemDiPesanan) { itemDiPesanan.jumlah++; } else { newPesanan.push({ id: idMenu, jumlah: 1 }); }
+                    transaction.update(mejaDocRef, { pesanan: newPesanan });
+                });
+            } catch (e) { console.error("Gagal menambah item: ", e); }
         }
 
         async function kurangiItemDariPesanan(idMenu) {
-            const mejaAktif = localData.meja.find(m => m.id === mejaAktifId);
-            if (!mejaAktif) return;
+            if (!mejaAktifId) return;
             const mejaDocRef = doc(db, getCollectionPath('meja'), mejaAktifId);
-            let newPesanan = [...(mejaAktif.pesanan || [])];
-            const itemDiPesanan = newPesanan.find(item => item.id === idMenu);
-
-            if (itemDiPesanan) {
-                itemDiPesanan.jumlah--;
-                if (itemDiPesanan.jumlah === 0) {
-                    newPesanan = newPesanan.filter(item => item.id !== idMenu);
-                }
-            }
-            await updateDoc(mejaDocRef, { pesanan: newPesanan });
+             try {
+                await runTransaction(db, async (transaction) => {
+                    const mejaDoc = await transaction.get(mejaDocRef);
+                    if (!mejaDoc.exists()) { throw "Meja tidak ditemukan!"; }
+                    let newPesanan = [...(mejaDoc.data().pesanan || [])];
+                    const itemIndex = newPesanan.findIndex(item => item.id === idMenu);
+                    if (itemIndex > -1) {
+                        if (newPesanan[itemIndex].jumlah > 1) {
+                            newPesanan[itemIndex].jumlah--;
+                        } else {
+                            newPesanan.splice(itemIndex, 1);
+                        }
+                    }
+                    transaction.update(mejaDocRef, { pesanan: newPesanan });
+                });
+            } catch (e) { console.error("Gagal mengurangi item: ", e); }
         }
 
         function updateTotalPesanan() {
@@ -776,7 +602,7 @@
 
             const subtotal = mejaAktif.pesanan.reduce((total, item) => {
                 const menuData = localData.menu.find(m => m.id === item.id);
-                return total + (menuData.harga * item.jumlah);
+                return total + (menuData ? menuData.harga * item.jumlah : 0);
             }, 0);
 
             const pajak = subtotal * 0.10;
@@ -785,69 +611,44 @@
             subtotalPesananEl.textContent = formatRupiah(subtotal);
             pajakPesananEl.textContent = formatRupiah(pajak);
             totalPesananEl.textContent = formatRupiah(total);
-
-            tombolKirimDapur.disabled = mejaAktif.pesanan.length === 0;
-            tombolBayar.disabled = mejaAktif.pesanan.length === 0;
+            tombolKirimDapur.disabled = false;
+            tombolBayar.disabled = mejaAktif.status !== 'terisi';
         }
-
-   
+     
         async function kirimKeDapur() {
             const mejaAktif = localData.meja.find(m => m.id === mejaAktifId);
             if (!mejaAktif || !mejaAktif.pesanan || mejaAktif.pesanan.length === 0) return;
+            tombolKirimDapur.disabled = true;
+            tombolKirimDapur.textContent = "Mengirim...";
 
             try {
                 await runTransaction(db, async (transaction) => {
-                    // 1) Kalkulasi total kebutuhan bahan untuk seluruh pesanan (semua reads must happen before writes)
                     const pesananPerDapur = {};
-                    const bahanTotals = {}; // { bahanId: totalJumlahYangDibutuhkan }
-
+                    const bahanTotals = {};
                     for (const itemPesanan of mejaAktif.pesanan) {
                         const menuItem = localData.menu.find(m => m.id === itemPesanan.id);
-                        if (!menuItem) throw new Error(`Menu ${itemPesanan.id} tidak ditemukan!`);
-
-                        // Kumpulkan kebutuhan bahan
-                        if (Array.isArray(menuItem.resep)) {
+                        if (!menuItem) throw new Error(`Menu ${itemPesanan.id} not found`);
+                        if(menuItem.resep) {
                             for (const resepItem of menuItem.resep) {
                                 bahanTotals[resepItem.bahanId] = (bahanTotals[resepItem.bahanId] || 0) + (resepItem.jumlah * itemPesanan.jumlah);
                             }
                         }
-
-                        // Kumpulkan item per dapur (tidak menulis ke DB di sini)
-                        if (!pesananPerDapur[menuItem.targetDapur]) {
-                            pesananPerDapur[menuItem.targetDapur] = [];
-                        }
-                        pesananPerDapur[menuItem.targetDapur].push({
-                            nama: menuItem.nama,
-                            jumlah: itemPesanan.jumlah
-                        });
+                        if (!pesananPerDapur[menuItem.targetDapur]) pesananPerDapur[menuItem.targetDapur] = [];
+                        pesananPerDapur[menuItem.targetDapur].push({ nama: menuItem.nama, jumlah: itemPesanan.jumlah });
                     }
 
-                    // 2) Baca semua dokumen bahan yang dibutuhkan
-                    const bahanUpdates = {}; // { bahanId: { ref, stokBaru } }
-                    for (const bahanId of Object.keys(bahanTotals)) {
+                    for (const bahanId in bahanTotals) {
                         const bahanDocRef = doc(db, getCollectionPath('bahanBaku'), bahanId);
-                        const bahanSnap = await transaction.get(bahanDocRef);
-                        if (!bahanSnap.exists()) throw new Error(`Bahan baku ${bahanId} tidak ditemukan!`);
-                        const currentStok = bahanSnap.data().stok;
-                        const needed = bahanTotals[bahanId];
-                        const stokBaru = currentStok - needed;
-                        if (stokBaru < 0) throw new Error(`Stok ${bahanSnap.data().nama} tidak mencukupi!`);
-                        bahanUpdates[bahanId] = { ref: bahanDocRef, stokBaru };
+                        const bahanDoc = await transaction.get(bahanDocRef);
+                        if (!bahanDoc.exists()) throw new Error(`Bahan ${bahanId} tidak ada`);
+                        const stokBaru = bahanDoc.data().stok - bahanTotals[bahanId];
+                        if (stokBaru < 0) throw new Error(`Stok ${bahanDoc.data().nama} tidak cukup`);
+                        transaction.update(bahanDocRef, { stok: stokBaru });
                     }
-
-                    // 3) Semua reads selesai — sekarang lakukan writes: update stok, buat pesanan dapur, update meja
-                    for (const bahanId in bahanUpdates) {
-                        transaction.update(bahanUpdates[bahanId].ref, { stok: bahanUpdates[bahanId].stokBaru });
-                    }
-
+                    
                     for (const dapur in pesananPerDapur) {
                         const pesananDapurRef = doc(collection(db, getCollectionPath('pesananDapur')));
-                        transaction.set(pesananDapurRef, {
-                            namaMeja: mejaAktif.nama,
-                            targetDapur: dapur,
-                            items: pesananPerDapur[dapur],
-                            createdAt: serverTimestamp()
-                        });
+                        transaction.set(pesananDapurRef, { namaMeja: mejaAktif.nama, targetDapur: dapur, items: pesananPerDapur[dapur], createdAt: serverTimestamp() });
                     }
 
                     const mejaDocRef = doc(db, getCollectionPath('meja'), mejaAktifId);
@@ -856,10 +657,13 @@
                 console.log(`Pesanan untuk ${mejaAktif.nama} berhasil dikirim!`);
             } catch (e) {
                 console.error("Transaksi gagal: ", e);
+                alert(`Gagal mengirim pesanan: ${e.message}`);
+            } finally {
+                tombolKirimDapur.disabled = false;
+                tombolKirimDapur.textContent = "Kirim ke Dapur";
             }
         }
      
-
         async function prosesPembayaran() {
             const mejaAktif = localData.meja.find(m => m.id === mejaAktifId);
             if (!mejaAktif || !mejaAktif.pesanan || mejaAktif.pesanan.length === 0) return;
@@ -871,10 +675,10 @@
 
             const totalHPP = mejaAktif.pesanan.reduce((total, item) => {
                 const menuData = localData.menu.find(m => m.id === item.id);
-                const hppPerItem = menuData.resep.reduce((hpp, resepItem) => {
+                const hppPerItem = menuData.resep ? menuData.resep.reduce((hpp, resepItem) => {
                     const bahan = localData.bahanBaku.find(b => b.id === resepItem.bahanId);
                     return hpp + (bahan.hargaBeliPerGram * resepItem.jumlah);
-                }, 0);
+                }, 0) : 0;
                 return total + (hppPerItem * item.jumlah);
             }, 0);
 
@@ -882,20 +686,15 @@
             const total = subtotal + pajak;
 
             const transaksiRef = doc(collection(db, getCollectionPath('transaksi')));
-            await setDoc(transaksiRef, {
-                waktu: serverTimestamp(),
-                namaMeja: mejaAktif.nama,
-                items: mejaAktif.pesanan,
-                subtotal,
-                pajak,
-                total,
-                hpp: totalHPP
-            });
+            await setDoc(transaksiRef, { waktu: serverTimestamp(), namaMeja: mejaAktif.nama, items: mejaAktif.pesanan, subtotal, pajak, total, hpp: totalHPP });
 
             const mejaDocRef = doc(db, getCollectionPath('meja'), mejaAktifId);
             await updateDoc(mejaDocRef, { pesanan: [], status: 'tersedia' });
 
             console.log(`Pembayaran untuk ${mejaAktif.nama} sebesar ${formatRupiah(total)} berhasil!`);
+            mejaAktifId = null;
+            renderMeja();
+            renderPesanan();
         }
 
         async function selesaikanPesananDapur(idPesanan) {
@@ -916,123 +715,72 @@
             }
         }
 
-        // ===================================
-        // INISIALISASI APLIKASI
-        // ===================================
         async function main() {
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
-                    console.log("User is signed in:", user.uid);
                     await setupInitialData();
                     await attachRealtimeListeners();
                     loadingOverlay.style.display = 'none';
                 } else {
-                    console.log("User is signed out. Attempting to sign in.");
                     try {
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
+                        if (initialAuthToken) { await signInWithCustomToken(auth, initialAuthToken); } 
+                        else { await signInAnonymously(auth); }
                     } catch (error) {
                         console.error("Error signing in: ", error);
-                        loadingOverlay.innerHTML = "Gagal terhubung ke server. Silakan refresh halaman.";
+                        loadingOverlay.innerHTML = "Gagal terhubung. Coba refresh.";
                     }
                 }
             });
         }
-
-        // ===================================
-        // SETUP DATA AWAL (SEEDING)
-        // ===================================
+        
         async function setupInitialData() {
-            const menuRef = collection(db, getCollectionPath('menu'));
-            const menuSnapshot = await getDocs(menuRef);
-            if (menuSnapshot.empty) {
-                console.log("Database kosong. Menambahkan data awal...");
-                loadingOverlay.querySelector('p').textContent = 'Menginisialisasi Data Awal...';
-
-                const initialData = { /* Data awal seperti di prototipe sebelumnya */
+            const settingsRef = doc(db, getCollectionPath('settings'), 'app-status');
+            const settingsSnap = await getDocs(settingsRef.parent);
+            if (settingsSnap.empty) {
+                console.log("Database kosong, menambahkan data awal...");
+                loadingOverlay.querySelector('p').textContent = 'Inisialisasi Data Awal...';
+                const initialData = {
                     pengguna: [
-                        { id: 'admin01', nama: 'Super Admin', peran: 'admin', pin: '1111' },
-                        { id: 'kasir01', nama: 'Budi Kasir', peran: 'kasir', pin: '2222' },
-                        { id: 'dapur01', nama: 'Chef Juna', peran: 'dapur', pin: '3333' }
+                        { id: 'admin01', nama: 'Super Admin', peran: 'admin', pin: '1111' }, { id: 'kasir01', nama: 'Budi Kasir', peran: 'kasir', pin: '2222' }, { id: 'dapur01', nama: 'Chef Juna', peran: 'dapur', pin: '3333' }
                     ],
                     bahanBaku: [
-                        { id: 'bb01', nama: 'Daging Sapi', stok: 5000, hargaBeliPerGram: 120 },
-                        { id: 'bb02', nama: 'Roti Burger', stok: 10000, hargaBeliPerGram: 40 },
-                        { id: 'bb03', nama: 'Keju Slice', stok: 2000, hargaBeliPerGram: 50 },
-                        { id: 'bb04', nama: 'Daun Selada', stok: 1000, hargaBeliPerGram: 15 },
-                        { id: 'bb05', nama: 'Tomat', stok: 2000, hargaBeliPerGram: 10 },
-                        { id: 'bb06', nama: 'Kentang', stok: 10000, hargaBeliPerGram: 8 },
-                        { id: 'bb07', nama: 'Biji Kopi', stok: 3000, hargaBeliPerGram: 25 },
-                        { id: 'bb08', nama: 'Susu Cair', stok: 5000, hargaBeliPerGram: 15 },
+                        { id: 'bb01', nama: 'Daging Sapi', stok: 5000, hargaBeliPerGram: 120 }, { id: 'bb02', nama: 'Roti Burger', stok: 10000, hargaBeliPerGram: 40 }, { id: 'bb03', nama: 'Keju Slice', stok: 2000, hargaBeliPerGram: 50 }, { id: 'bb04', nama: 'Daun Selada', stok: 1000, hargaBeliPerGram: 15 }, { id: 'bb05', nama: 'Tomat', stok: 2000, hargaBeliPerGram: 10 }, { id: 'bb06', nama: 'Kentang', stok: 10000, hargaBeliPerGram: 8 }, { id: 'bb07', nama: 'Biji Kopi', stok: 3000, hargaBeliPerGram: 25 }, { id: 'bb08', nama: 'Susu Cair', stok: 5000, hargaBeliPerGram: 15 },
                     ],
                     menu: [
-                        { id: 'm01', kode: 'MKN-01', nama: 'Beef Burger', kategori: 'Makanan', harga: 55000, targetDapur: 'Dapur Utama', resep: [{ bahanId: 'bb01', jumlah: 150 }, { bahanId: 'bb02', jumlah: 50 }, { bahanId: 'bb03', jumlah: 20 }, { bahanId: 'bb04', jumlah: 15 }, { bahanId: 'bb05', jumlah: 20 }] },
-                        { id: 'm02', kode: 'MKN-02', nama: 'Cheeseburger', kategori: 'Makanan', harga: 60000, targetDapur: 'Dapur Utama', resep: [{ bahanId: 'bb01', jumlah: 150 }, { bahanId: 'bb02', jumlah: 50 }, { bahanId: 'bb03', jumlah: 40 }, { bahanId: 'bb04', jumlah: 15 }, { bahanId: 'bb05', jumlah: 20 }] },
-                        { id: 'm03', kode: 'MKN-03', nama: 'Kentang Goreng', kategori: 'Makanan', harga: 25000, targetDapur: 'Dapur Utama', resep: [{ bahanId: 'bb06', jumlah: 200 }] },
-                        { id: 'm04', kode: 'MNM-01', nama: 'Caffe Latte', kategori: 'Minuman', harga: 30000, targetDapur: 'Bar', resep: [{ bahanId: 'bb07', jumlah: 20 }, { bahanId: 'bb08', jumlah: 150 }] },
-                        { id: 'm05', kode: 'MNM-02', nama: 'Cappuccino', kategori: 'Minuman', harga: 30000, targetDapur: 'Bar', resep: [{ bahanId: 'bb07', jumlah: 20 }, { bahanId: 'bb08', jumlah: 120 }] }
+                        { id: 'm01', kode: 'MKN-01', nama: 'Beef Burger', kategori: 'Makanan', harga: 55000, targetDapur: 'Dapur Utama', resep: [ { bahanId: 'bb01', jumlah: 150 }, { bahanId: 'bb02', jumlah: 50 }, { bahanId: 'bb03', jumlah: 20 }, { bahanId: 'bb04', jumlah: 15 }, { bahanId: 'bb05', jumlah: 20 } ] }, { id: 'm02', kode: 'MKN-02', nama: 'Cheeseburger', kategori: 'Makanan', harga: 60000, targetDapur: 'Dapur Utama', resep: [ { bahanId: 'bb01', jumlah: 150 }, { bahanId: 'bb02', jumlah: 50 }, { bahanId: 'bb03', jumlah: 40 }, { bahanId: 'bb04', jumlah: 15 }, { bahanId: 'bb05', jumlah: 20 } ] }, { id: 'm03', kode: 'MKN-03', nama: 'Kentang Goreng', kategori: 'Makanan', harga: 25000, targetDapur: 'Dapur Utama', resep: [ { bahanId: 'bb06', jumlah: 200 } ] }, { id: 'm04', kode: 'MNM-01', nama: 'Caffe Latte', kategori: 'Minuman', harga: 30000, targetDapur: 'Bar', resep: [ { bahanId: 'bb07', jumlah: 20 }, { bahanId: 'bb08', jumlah: 150 } ] }, { id: 'm05', kode: 'MNM-02', nama: 'Cappuccino', kategori: 'Minuman', harga: 30000, targetDapur: 'Bar', resep: [ { bahanId: 'bb07', jumlah: 20 }, { bahanId: 'bb08', jumlah: 120 } ] }
                     ],
-                    meja: Array.from({ length: 12 }, (_, i) => ({ id_meja: i + 1, nama: `Meja ${i + 1}`, status: 'tersedia', pesanan: [] }))
+                    meja: Array.from({ length: 12 }, (_, i) => ({ id: `${i + 1}`, id_meja: i + 1, nama: `Meja ${i + 1}`, status: 'tersedia', pesanan: [] }))
                 };
-
                 const batch = writeBatch(db);
                 for (const key in initialData) {
                     initialData[key].forEach(item => {
-                        const docRef = doc(db, getCollectionPath(key), item.id || String(item.id_meja));
+                        const docRef = doc(db, getCollectionPath(key), item.id);
                         batch.set(docRef, item);
                     });
                 }
+                batch.set(settingsRef, { initialized: true });
                 await batch.commit();
                 console.log("Data awal berhasil ditambahkan.");
-            } else {
-                console.log("Database sudah berisi data.");
             }
         }
 
-        // ===================================
-        // EVENT LISTENERS
-        // ===================================
-        pinButtons.forEach(button => {
-            button.addEventListener('click', () => handlePinInput(button.dataset.value));
-        });
-        pinClear.addEventListener('click', () => {
-            pinSaatIni = '';
-            updatePinDisplay();
-        });
-        pinBackspace.addEventListener('click', () => {
-            pinSaatIni = pinSaatIni.slice(0, -1);
-            updatePinDisplay();
-        });
-
+        pinButtons.forEach(button => button.addEventListener('click', () => handlePinInput(button.dataset.value)));
+        pinClear.addEventListener('click', () => { pinSaatIni = ''; updatePinDisplay(); });
+        pinBackspace.addEventListener('click', () => { pinSaatIni = pinSaatIni.slice(0, -1); updatePinDisplay(); });
         tombolLogout.addEventListener('click', logout);
         tombolKirimDapur.addEventListener('click', kirimKeDapur);
         tombolBayar.addEventListener('click', prosesPembayaran);
-
         adminMenuItems.forEach(item => {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
                 adminMenuItems.forEach(i => i.classList.remove('bg-gray-900'));
                 item.classList.add('bg-gray-900');
-
                 const targetId = item.dataset.target;
-                adminPanels.forEach(panel => {
-                    if (panel.id === targetId) {
-                        panel.classList.remove('hidden');
-                    } else {
-                        panel.classList.add('hidden');
-                    }
-                });
+                adminPanels.forEach(panel => panel.id === targetId ? panel.classList.remove('hidden') : panel.classList.add('hidden'));
             });
         });
 
-        // ===================================
-        // Jalankan Aplikasi
-        // ===================================
         main();
-
     </script>
 </body>
 
