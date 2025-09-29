@@ -1,4 +1,3 @@
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
@@ -8,16 +7,12 @@ import {
 // ===================================
 // KONFIGURASI DAN INISIALISASI FIREBASE
 // ===================================
-// Variabel global yang akan disediakan oleh environment
 const appId = typeof __app_id !== 'undefined' ? __app_id : firebaseConfig.projectId || 'default-pos-app';
-// const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {}; // HAPUS BARIS INI
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-// Inisialisasi Firebase App
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-// setLogLevel('debug');
 
 // ===================================
 // VARIABEL STATE APLIKASI
@@ -25,9 +20,8 @@ const db = getFirestore(app);
 let penggunaAktif = null;
 let pinSaatIni = '';
 let mejaAktifId = null;
-let unsubscribeListeners = []; // Menyimpan semua listener real-time
+let unsubscribeListeners = [];
 
-// Data lokal untuk cache, diisi oleh listener Firebase
 const localData = {
     pengguna: [],
     bahanBaku: [],
@@ -72,15 +66,38 @@ const dapurKosongMsg = document.getElementById('dapur-kosong');
 const adminMenuItems = document.querySelectorAll('.admin-menu-item');
 const adminPanels = document.querySelectorAll('.admin-panel');
 
+// Elemen DOM untuk Modal Menu
+const menuModal = document.getElementById('menu-modal');
+const menuForm = document.getElementById('menu-form');
+const modalTitleMenu = document.getElementById('modal-title-menu');
+const tombolTambahMenu = document.getElementById('tombol-tambah-menu');
+const modalBatalMenu = document.getElementById('modal-batal-menu');
+const modalSimpanMenu = document.getElementById('modal-simpan-menu');
+
+// Elemen DOM untuk Modal Stok
+const stokModal = document.getElementById('stok-modal');
+const stokForm = document.getElementById('stok-form');
+const modalTitleStok = document.getElementById('modal-title-stok');
+const tombolTambahStok = document.getElementById('tombol-tambah-stok');
+const modalBatalStok = document.getElementById('modal-batal-stok');
+const modalSimpanStok = document.getElementById('modal-simpan-stok');
+
+// Elemen DOM untuk Modal Pengguna
+const penggunaModal = document.getElementById('pengguna-modal');
+const penggunaForm = document.getElementById('pengguna-form');
+const modalTitlePengguna = document.getElementById('modal-title-pengguna');
+const tombolTambahPengguna = document.getElementById('tombol-tambah-pengguna');
+const modalBatalPengguna = document.getElementById('modal-batal-pengguna');
+const modalSimpanPengguna = document.getElementById('modal-simpan-pengguna');
+
 // ===================================
 // FUNGSI HELPER
 // ===================================
 const formatRupiah = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
-
 const getCollectionPath = (collName) => `/artifacts/${appId}/public/data/${collName}`;
 
 // ===================================
-// FUNGSI RENDER (Hanya menampilkan data dari localData)
+// FUNGSI RENDER
 // ===================================
 function renderMeja() {
     containerMeja.innerHTML = '';
@@ -97,7 +114,7 @@ function renderMeja() {
 
 function renderMenu() {
     containerMenu.innerHTML = '';
-    const kategori = [...new Set(localData.menu.map(item => item.kategori))];
+    const kategori = [...new Set(localData.menu.map(item => item.kategori))].sort();
 
     kategori.forEach(k => {
         const kategoriHeader = document.createElement('h3');
@@ -110,12 +127,12 @@ function renderMenu() {
             const itemEl = document.createElement('div');
             itemEl.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-2';
             itemEl.innerHTML = `
-                        <div>
-                            <p class="font-semibold">${item.nama} (${item.kode})</p>
-                            <p class="text-sm text-gray-500">${formatRupiah(item.harga)}</p>
-                        </div>
-                        <button class="tambah-menu-btn bg-indigo-500 text-white w-10 h-10 rounded-full text-2xl font-bold hover:bg-indigo-600 transition">+</button>
-                    `;
+                <div>
+                    <p class="font-semibold">${item.nama} (${item.kode})</p>
+                    <p class="text-sm text-gray-500">${formatRupiah(item.harga)}</p>
+                </div>
+                <button class="tambah-menu-btn bg-indigo-500 text-white w-10 h-10 rounded-full text-2xl font-bold hover:bg-indigo-600 transition">+</button>
+            `;
             itemEl.querySelector('.tambah-menu-btn').onclick = () => tambahItemKePesanan(item.id);
             containerMenu.appendChild(itemEl);
         });
@@ -143,16 +160,16 @@ async function renderPesanan() {
             const itemEl = document.createElement('div');
             itemEl.className = 'flex items-center justify-between p-3 mb-2';
             itemEl.innerHTML = `
-                        <div>
-                            <p class="font-semibold">${itemData.nama}</p>
-                            <p class="text-sm text-gray-500">${formatRupiah(itemData.harga)}</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <button class="kurang-item-btn bg-gray-200 w-8 h-8 rounded-full font-bold">-</button>
-                            <span class="font-bold text-lg w-8 text-center">${item.jumlah}</span>
-                            <button class="tambah-item-btn bg-gray-200 w-8 h-8 rounded-full font-bold">+</button>
-                        </div>
-                    `;
+                <div>
+                    <p class="font-semibold">${itemData.nama}</p>
+                    <p class="text-sm text-gray-500">${formatRupiah(itemData.harga)}</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button class="kurang-item-btn bg-gray-200 w-8 h-8 rounded-full font-bold">-</button>
+                    <span class="font-bold text-lg w-8 text-center">${item.jumlah}</span>
+                    <button class="tambah-item-btn bg-gray-200 w-8 h-8 rounded-full font-bold">+</button>
+                </div>
+            `;
             itemEl.querySelector('.tambah-item-btn').onclick = () => tambahItemKePesanan(item.id);
             itemEl.querySelector('.kurang-item-btn').onclick = () => kurangiItemDariPesanan(item.id);
             containerPesanan.appendChild(itemEl);
@@ -167,23 +184,23 @@ function renderDapur() {
         dapurKosongMsg.classList.remove('hidden');
     } else {
         dapurKosongMsg.classList.add('hidden');
-        localData.pesananDapur.forEach(pesanan => {
+        localData.pesananDapur.sort((a,b) => a.createdAt.seconds - b.createdAt.seconds).forEach(pesanan => {
             const card = document.createElement('div');
             card.className = 'bg-white rounded-xl shadow-lg p-4 flex flex-col';
             let itemsHTML = pesanan.items.map(item => `
-                        <li class="flex justify-between">
-                            <span>${item.nama}</span>
-                            <span class="font-bold">x${item.jumlah}</span>
-                        </li>
-                    `).join('');
+                <li class="flex justify-between">
+                    <span>${item.nama}</span>
+                    <span class="font-bold">x${item.jumlah}</span>
+                </li>
+            `).join('');
             card.innerHTML = `
-                        <div class="border-b pb-2 mb-2">
-                            <h3 class="text-xl font-bold">${pesanan.namaMeja}</h3>
-                            <p class="text-sm text-gray-500">${pesanan.targetDapur}</p>
-                        </div>
-                        <ul class="space-y-1 flex-1">${itemsHTML}</ul>
-                        <button class="selesai-pesanan-btn mt-4 w-full bg-green-500 text-white font-bold p-3 rounded-lg hover:bg-green-600 transition">Selesai</button>
-                    `;
+                <div class="border-b pb-2 mb-2">
+                    <h3 class="text-xl font-bold">${pesanan.namaMeja}</h3>
+                    <p class="text-sm text-gray-500">${pesanan.targetDapur}</p>
+                </div>
+                <ul class="space-y-1 flex-1">${itemsHTML}</ul>
+                <button class="selesai-pesanan-btn mt-4 w-full bg-green-500 text-white font-bold p-3 rounded-lg hover:bg-green-600 transition">Selesai</button>
+            `;
             card.querySelector('.selesai-pesanan-btn').onclick = () => selesaikanPesananDapur(pesanan.id);
             containerDapur.appendChild(card);
         });
@@ -207,15 +224,15 @@ function renderAdminPanels() {
             const transaksiDiv = document.createElement('div');
             transaksiDiv.className = 'p-3 bg-white border rounded-md mb-2 flex justify-between items-center';
             transaksiDiv.innerHTML = `
-                        <div>
-                          <p class="font-semibold">Transaksi #${t.id.substring(0, 6)} (${t.namaMeja})</p>
-                          <p class="text-sm text-gray-500">${waktu}</p>
-                        </div>
-                        <div class="text-right">
-                          <p class="font-bold text-green-600">${formatRupiah(t.total)}</p>
-                          <p class="text-sm text-red-500">HPP: ${formatRupiah(t.hpp)}</p>
-                        </div>
-                    `;
+                <div>
+                  <p class="font-semibold">Transaksi #${t.id.substring(0, 6)} (${t.namaMeja})</p>
+                  <p class="text-sm text-gray-500">${waktu}</p>
+                </div>
+                <div class="text-right">
+                  <p class="font-bold text-green-600">${formatRupiah(t.total)}</p>
+                  <p class="text-sm text-red-500">HPP: ${formatRupiah(t.hpp)}</p>
+                </div>
+            `;
             detailTransaksiEl.appendChild(transaksiDiv);
         });
     }
@@ -224,49 +241,69 @@ function renderAdminPanels() {
     document.getElementById('laporan-hpp').textContent = formatRupiah(totalHPP);
     document.getElementById('laporan-laba').textContent = formatRupiah(totalPendapatan - totalHPP);
 
+
     // Menu
     const tabelMenuBody = document.getElementById('tabel-menu');
     tabelMenuBody.innerHTML = '';
-    localData.menu.forEach(m => {
+    localData.menu.sort((a,b) => a.kode.localeCompare(b.kode)).forEach(m => {
         tabelMenuBody.innerHTML += `
-                    <tr>
-                        <td class="table-cell">${m.kode}</td>
-                        <td class="table-cell">${m.nama}</td>
-                        <td class="table-cell">${formatRupiah(m.harga)}</td>
-                        <td class="table-cell">${m.targetDapur}</td>
-                        <td class="table-cell"><button class="text-indigo-600 hover:text-indigo-900">Edit</button></td>
-                    </tr>
-                `;
+            <tr>
+                <td class="table-cell">${m.kode}</td>
+                <td class="table-cell">${m.nama}</td>
+                <td class="table-cell">${m.kategori}</td>
+                <td class="table-cell text-right">${formatRupiah(m.harga)}</td>
+                <td class="table-cell">${m.targetDapur}</td>
+                <td class="table-cell">
+                    <button data-id="${m.id}" class="edit-menu-btn text-indigo-600 hover:text-indigo-900 font-semibold">Edit</button>
+                    <button data-id="${m.id}" class="hapus-menu-btn text-red-600 hover:text-red-900 font-semibold ml-4">Hapus</button>
+                </td>
+            </tr>
+        `;
     });
+    
+    document.querySelectorAll('.edit-menu-btn').forEach(btn => btn.onclick = () => showMenuModal(btn.dataset.id));
+    document.querySelectorAll('.hapus-menu-btn').forEach(btn => btn.onclick = () => hapusMenu(btn.dataset.id));
 
-    // Stok
+    // Render Tabel Stok
     const tabelStokBody = document.getElementById('tabel-stok');
     tabelStokBody.innerHTML = '';
-    localData.bahanBaku.forEach(bb => {
+    localData.bahanBaku.sort((a,b) => a.nama.localeCompare(b.nama)).forEach(bb => {
         tabelStokBody.innerHTML += `
-                    <tr>
-                        <td class="table-cell">${bb.id}</td>
-                        <td class="table-cell">${bb.nama}</td>
-                        <td class="table-cell">${bb.stok.toFixed(2)}</td>
-                        <td class="table-cell">${formatRupiah(bb.hargaBeliPerGram)}</td>
-                    </tr>
-                `;
+            <tr>
+                <td class="table-cell">${bb.id}</td>
+                <td class="table-cell">${bb.nama}</td>
+                <td class="table-cell text-right">${bb.stok.toFixed(2)}</td>
+                <td class="table-cell text-right">${formatRupiah(bb.hargaBeliPerGram)}</td>
+                <td class="table-cell">
+                     <button data-id="${bb.id}" class="edit-stok-btn text-indigo-600 hover:text-indigo-900 font-semibold">Edit</button>
+                    <button data-id="${bb.id}" class="hapus-stok-btn text-red-600 hover:text-red-900 font-semibold ml-4">Hapus</button>
+                </td>
+            </tr>
+        `;
     });
+    document.querySelectorAll('.edit-stok-btn').forEach(btn => btn.onclick = () => showStokModal(btn.dataset.id));
+    document.querySelectorAll('.hapus-stok-btn').forEach(btn => btn.onclick = () => hapusStok(btn.dataset.id));
 
-    // Pengguna
+
+    // Render Tabel Pengguna
     const tabelPenggunaBody = document.getElementById('tabel-pengguna');
     tabelPenggunaBody.innerHTML = '';
-    localData.pengguna.forEach(p => {
+    localData.pengguna.sort((a,b) => a.nama.localeCompare(b.nama)).forEach(p => {
         tabelPenggunaBody.innerHTML += `
-                    <tr>
-                        <td class="table-cell">${p.id}</td>
-                        <td class="table-cell">${p.nama}</td>
-                        <td class="table-cell capitalize">${p.peran}</td>
-                        <td class="table-cell">${p.pin}</td>
-                        <td class="table-cell"><button class="text-indigo-600 hover:text-indigo-900">Edit</button></td>
-                    </tr>
-                `;
+            <tr>
+                <td class="table-cell">${p.id}</td>
+                <td class="table-cell">${p.nama}</td>
+                <td class="table-cell capitalize">${p.peran}</td>
+                <td class="table-cell">${p.pin}</td>
+                <td class="table-cell">
+                    <button data-id="${p.id}" class="edit-pengguna-btn text-indigo-600 hover:text-indigo-900 font-semibold">Edit</button>
+                    <button data-id="${p.id}" class="hapus-pengguna-btn text-red-600 hover:text-red-900 font-semibold ml-4">Hapus</button>
+                </td>
+            </tr>
+        `;
     });
+    document.querySelectorAll('.edit-pengguna-btn').forEach(btn => btn.onclick = () => showPenggunaModal(btn.dataset.id));
+    document.querySelectorAll('.hapus-pengguna-btn').forEach(btn => btn.onclick = () => hapusPengguna(btn.dataset.id));
 }
 
 // ===================================
@@ -286,8 +323,11 @@ async function attachRealtimeListeners() {
             if (penggunaAktif) {
                 switch (collName) {
                     case 'meja': renderMeja(); renderPesanan(); break;
-                    case 'menu': renderMenu(); break;
-                    case 'pesananDapur': renderDapur(); break;
+                    case 'menu': 
+                        renderMenu(); 
+                        if (penggunaAktif.peran === 'admin') renderAdminPanels();
+                        break;
+                    case 'pesananDapur': if(penggunaAktif.peran === 'dapur') renderDapur(); break;
                     case 'pengguna': case 'bahanBaku': case 'transaksi':
                         if (penggunaAktif.peran === 'admin') renderAdminPanels();
                         break;
@@ -317,7 +357,6 @@ async function prosesLogin() {
         navigasiBerdasarkanPeran(penggunaAktif.peran);
     } else {
         pinDisplay.classList.add('animate-shake', 'bg-red-200');
-        console.error('PIN Salah!');
         setTimeout(() => {
             pinDisplay.classList.remove('animate-shake', 'bg-red-200');
             pinSaatIni = '';
@@ -342,6 +381,7 @@ function navigasiBerdasarkanPeran(peran) {
         renderDapur();
     } else if (peran === 'admin') {
         tampilanAdmin.classList.remove('hidden');
+        document.querySelector('.admin-menu-item[data-target="panel-laporan"]').click();
         renderAdminPanels();
     }
 }
@@ -362,7 +402,7 @@ function pilihMeja(idMeja) {
 }
 
 async function tambahItemKePesanan(idMenu) {
-    if (!mejaAktifId) { console.error('Pilih meja terlebih dahulu!'); return; }
+    if (!mejaAktifId) { alert('Pilih meja terlebih dahulu!'); return; }
     const mejaDocRef = doc(db, getCollectionPath('meja'), mejaAktifId);
     try {
         await runTransaction(db, async (transaction) => {
@@ -371,7 +411,7 @@ async function tambahItemKePesanan(idMenu) {
             const newPesanan = [...(mejaDoc.data().pesanan || [])];
             const itemDiPesanan = newPesanan.find(item => item.id === idMenu);
             if (itemDiPesanan) { itemDiPesanan.jumlah++; } else { newPesanan.push({ id: idMenu, jumlah: 1 }); }
-            transaction.update(mejaDocRef, { pesanan: newPesanan });
+            transaction.update(mejaDocRef, { pesanan: newPesanan, status: 'memesan' });
         });
     } catch (e) { console.error("Gagal menambah item: ", e); }
 }
@@ -430,20 +470,16 @@ async function kirimKeDapur() {
 
     try {
         await runTransaction(db, async (transaction) => {
-            // 1) Kumpulkan semua kebutuhan (reads only)
-            const pesananPerDapur = {}; // { dapur: [item,...] }
-            const bahanTotals = {};     // { bahanId: totalNeeded }
-            const menuRefs = {};        // cache menu refs if needed
+            const pesananPerDapur = {};
+            const bahanTotals = {};
 
             for (const item of mejaAktif.pesanan) {
                 const menuItem = localData.menu.find(m => m.id === item.id);
                 if (!menuItem) throw new Error(`Menu ${item.id} tidak ditemukan`);
-                // group by dapur
                 const dapur = menuItem.targetDapur || 'default';
                 pesananPerDapur[dapur] = pesananPerDapur[dapur] || [];
                 pesananPerDapur[dapur].push({ nama: menuItem.nama, jumlah: item.jumlah, menuId: menuItem.id });
 
-                // accumulate bahan needed (assumes menuItem.resep = [{ bahanId, jumlah }, ...])
                 if (Array.isArray(menuItem.resep)) {
                     for (const r of menuItem.resep) {
                         bahanTotals[r.bahanId] = (bahanTotals[r.bahanId] || 0) + (r.jumlah * item.jumlah);
@@ -451,8 +487,7 @@ async function kirimKeDapur() {
                 }
             }
 
-            // 2) Read all bahan documents required (all reads first)
-            const bahanDocsData = {}; // { bahanId: { snap, currentStok, nama } }
+            const bahanDocsData = {};
             for (const bahanId of Object.keys(bahanTotals)) {
                 const bahanRef = doc(db, getCollectionPath('bahanBaku'), bahanId);
                 const bahanSnap = await transaction.get(bahanRef);
@@ -465,7 +500,6 @@ async function kirimKeDapur() {
                 };
             }
 
-            // 3) Validate stock after all reads
             for (const bahanId of Object.keys(bahanTotals)) {
                 const needed = bahanTotals[bahanId];
                 const current = bahanDocsData[bahanId].currentStok;
@@ -474,14 +508,11 @@ async function kirimKeDapur() {
                 }
             }
 
-            // 4) All reads done -> perform writes (updates & creates)
-            // update bahan stok
             for (const bahanId of Object.keys(bahanTotals)) {
                 const newStok = bahanDocsData[bahanId].currentStok - bahanTotals[bahanId];
                 transaction.update(bahanDocsData[bahanId].ref, { stok: newStok });
             }
 
-            // create pesananDapur documents
             for (const dapur of Object.keys(pesananPerDapur)) {
                 const pesananRef = doc(collection(db, getCollectionPath('pesananDapur')));
                 transaction.set(pesananRef, {
@@ -492,15 +523,13 @@ async function kirimKeDapur() {
                 });
             }
 
-            // update meja status
             const mejaRef = doc(db, getCollectionPath('meja'), mejaAktifId);
             transaction.update(mejaRef, { status: 'terisi', updatedAt: serverTimestamp() });
         });
-
-        console.log(`Pesanan untuk meja ${mejaAktif.nama} berhasil dikirim ke dapur.`);
+        alert(`Pesanan untuk meja ${mejaAktif.nama} berhasil dikirim ke dapur.`);
     } catch (err) {
         console.error("Transaksi gagal: ", err);
-        // tampilkan pesan ke UI jika perlu
+        alert(`Gagal mengirim pesanan: ${err.message}`);
     }
 }
 
@@ -526,12 +555,12 @@ async function prosesPembayaran() {
     const total = subtotal + pajak;
 
     const transaksiRef = doc(collection(db, getCollectionPath('transaksi')));
-    await setDoc(transaksiRef, { waktu: serverTimestamp(), namaMeja: mejaAktif.nama, items: mejaAktif.pesanan, subtotal, pajak, total, hpp: totalHPP });
+    await setDoc(transaksiRef, { id: transaksiRef.id, waktu: serverTimestamp(), namaMeja: mejaAktif.nama, items: mejaAktif.pesanan, subtotal, pajak, total, hpp: totalHPP });
 
     const mejaDocRef = doc(db, getCollectionPath('meja'), mejaAktifId);
     await updateDoc(mejaDocRef, { pesanan: [], status: 'tersedia' });
 
-    console.log(`Pembayaran untuk ${mejaAktif.nama} sebesar ${formatRupiah(total)} berhasil!`);
+    alert(`Pembayaran untuk ${mejaAktif.nama} sebesar ${formatRupiah(total)} berhasil!`);
     mejaAktifId = null;
     renderMeja();
     renderPesanan();
@@ -539,6 +568,220 @@ async function prosesPembayaran() {
 
 async function selesaikanPesananDapur(idPesanan) {
     await deleteDoc(doc(db, getCollectionPath('pesananDapur'), idPesanan));
+}
+
+
+// ===== FUNGSI MODAL MENU =====
+function showMenuModal(id = null) {
+    menuForm.reset();
+    if (id) {
+        const menuData = localData.menu.find(m => m.id === id);
+        if (menuData) {
+            modalTitleMenu.textContent = 'Edit Menu';
+            document.getElementById('menu-id').value = id;
+            document.getElementById('menu-kode').value = menuData.kode;
+            document.getElementById('menu-nama').value = menuData.nama;
+            document.getElementById('menu-kategori').value = menuData.kategori;
+            document.getElementById('menu-harga').value = menuData.harga;
+            document.getElementById('menu-dapur').value = menuData.targetDapur;
+        }
+    } else {
+        modalTitleMenu.textContent = 'Tambah Menu Baru';
+        document.getElementById('menu-id').value = '';
+    }
+    menuModal.classList.remove('hidden');
+}
+
+function hideMenuModal() {
+    menuModal.classList.add('hidden');
+}
+
+async function simpanMenu(event) {
+    event.preventDefault();
+    modalSimpanMenu.disabled = true;
+    modalSimpanMenu.textContent = 'Menyimpan...';
+
+    const id = document.getElementById('menu-id').value;
+    const data = {
+        kode: document.getElementById('menu-kode').value,
+        nama: document.getElementById('menu-nama').value,
+        kategori: document.getElementById('menu-kategori').value,
+        harga: Number(document.getElementById('menu-harga').value),
+        targetDapur: document.getElementById('menu-dapur').value,
+        resep: []
+    };
+
+    try {
+        let docRef;
+        if (id) {
+            docRef = doc(db, getCollectionPath('menu'), id);
+            await updateDoc(docRef, data);
+        } else {
+            docRef = doc(collection(db, getCollectionPath('menu')));
+            await setDoc(docRef, { ...data, id: docRef.id });
+        }
+        hideMenuModal();
+    } catch (error) {
+        console.error("Error menyimpan menu: ", error);
+        alert("Gagal menyimpan data.");
+    } finally {
+        modalSimpanMenu.disabled = false;
+        modalSimpanMenu.textContent = 'Simpan';
+    }
+}
+
+async function hapusMenu(id) {
+    const menuData = localData.menu.find(m => m.id === id);
+    if (confirm(`Apakah Anda yakin ingin menghapus "${menuData.nama}"?`)) {
+        try {
+            await deleteDoc(doc(db, getCollectionPath('menu'), id));
+        } catch (error) {
+            console.error("Error menghapus menu: ", error);
+            alert("Gagal menghapus data.");
+        }
+    }
+}
+
+// FUNGSI-FUNGSI BARU UNTUK MODAL STOK
+function showStokModal(id = null) {
+    stokForm.reset();
+    if (id) {
+        const stokData = localData.bahanBaku.find(bb => bb.id === id);
+        if (stokData) {
+            modalTitleStok.textContent = 'Edit Bahan Baku';
+            document.getElementById('stok-id').value = id;
+            document.getElementById('stok-nama').value = stokData.nama;
+            document.getElementById('stok-jumlah').value = stokData.stok;
+            document.getElementById('stok-harga-beli').value = stokData.hargaBeliPerGram;
+        }
+    } else {
+        modalTitleStok.textContent = 'Tambah Bahan Baku Baru';
+        document.getElementById('stok-id').value = '';
+    }
+    stokModal.classList.remove('hidden');
+}
+
+function hideStokModal() {
+    stokModal.classList.add('hidden');
+}
+
+async function simpanStok(event) {
+    event.preventDefault();
+    modalSimpanStok.disabled = true;
+    modalSimpanStok.textContent = 'Menyimpan...';
+
+    const id = document.getElementById('stok-id').value;
+    const data = {
+        nama: document.getElementById('stok-nama').value,
+        stok: Number(document.getElementById('stok-jumlah').value),
+        hargaBeliPerGram: Number(document.getElementById('stok-harga-beli').value)
+    };
+
+    try {
+        let docRef;
+        if (id) {
+            docRef = doc(db, getCollectionPath('bahanBaku'), id);
+            await updateDoc(docRef, data);
+        } else {
+            const prefix = data.nama.substring(0,2).toLowerCase();
+            const timestamp = Date.now().toString().slice(-4);
+            const newId = `bb${prefix}${timestamp}`;
+            docRef = doc(db, getCollectionPath('bahanBaku'), newId);
+            await setDoc(docRef, { ...data, id: newId });
+        }
+        hideStokModal();
+    } catch (error) {
+        console.error("Error menyimpan stok: ", error);
+        alert("Gagal menyimpan data.");
+    } finally {
+        modalSimpanStok.disabled = false;
+        modalSimpanStok.textContent = 'Simpan';
+    }
+}
+
+async function hapusStok(id) {
+    const stokData = localData.bahanBaku.find(bb => bb.id === id);
+    if (confirm(`Apakah Anda yakin ingin menghapus "${stokData.nama}"?`)) {
+        try {
+            await deleteDoc(doc(db, getCollectionPath('bahanBaku'), id));
+        } catch (error) {
+            console.error("Error menghapus stok: ", error);
+            alert("Gagal menghapus data.");
+        }
+    }
+}
+
+// FUNGSI-FUNGSI BARU UNTUK MODAL PENGGUNA
+function showPenggunaModal(id = null) {
+    penggunaForm.reset();
+    if (id) {
+        const penggunaData = localData.pengguna.find(p => p.id === id);
+        if (penggunaData) {
+            modalTitlePengguna.textContent = 'Edit Pengguna';
+            document.getElementById('pengguna-id').value = id;
+            document.getElementById('pengguna-nama').value = penggunaData.nama;
+            document.getElementById('pengguna-peran').value = penggunaData.peran;
+            document.getElementById('pengguna-pin').value = penggunaData.pin;
+        }
+    } else {
+        modalTitlePengguna.textContent = 'Tambah Pengguna Baru';
+        document.getElementById('pengguna-id').value = '';
+    }
+    penggunaModal.classList.remove('hidden');
+}
+
+function hidePenggunaModal() {
+    penggunaModal.classList.add('hidden');
+}
+
+async function simpanPengguna(event) {
+    event.preventDefault();
+    modalSimpanPengguna.disabled = true;
+    modalSimpanPengguna.textContent = 'Menyimpan...';
+
+    const id = document.getElementById('pengguna-id').value;
+    const data = {
+        nama: document.getElementById('pengguna-nama').value,
+        peran: document.getElementById('pengguna-peran').value,
+        pin: document.getElementById('pengguna-pin').value
+    };
+
+    try {
+        let docRef;
+        if (id) {
+            docRef = doc(db, getCollectionPath('pengguna'), id);
+            await updateDoc(docRef, data);
+        } else {
+            const prefix = data.peran.substring(0,2).toLowerCase();
+            const timestamp = Date.now().toString().slice(-3);
+            const newId = `${prefix}${timestamp}`;
+            docRef = doc(db, getCollectionPath('pengguna'), newId);
+            await setDoc(docRef, { ...data, id: newId });
+        }
+        hidePenggunaModal();
+    } catch (error) {
+        console.error("Error menyimpan pengguna: ", error);
+        alert("Gagal menyimpan data.");
+    } finally {
+        modalSimpanPengguna.disabled = false;
+        modalSimpanPengguna.textContent = 'Simpan';
+    }
+}
+
+async function hapusPengguna(id) {
+    const penggunaData = localData.pengguna.find(p => p.id === id);
+    if (id === 'admin01') {
+        alert('Pengguna Super Admin tidak dapat dihapus.');
+        return;
+    }
+    if (confirm(`Apakah Anda yakin ingin menghapus pengguna "${penggunaData.nama}"?`)) {
+        try {
+            await deleteDoc(doc(db, getCollectionPath('pengguna'), id));
+        } catch (error) {
+            console.error("Error menghapus pengguna: ", error);
+            alert("Gagal menghapus data.");
+        }
+    }
 }
 
 function updatePinDisplay() {
@@ -600,7 +843,6 @@ async function setupInitialData() {
         }
         batch.set(settingsRef, { initialized: true });
         await batch.commit();
-        console.log("Data awal berhasil ditambahkan.");
     }
 }
 
@@ -619,5 +861,20 @@ adminMenuItems.forEach(item => {
         adminPanels.forEach(panel => panel.id === targetId ? panel.classList.remove('hidden') : panel.classList.add('hidden'));
     });
 });
+
+// Event listener untuk modal menu
+tombolTambahMenu.addEventListener('click', () => showMenuModal());
+modalBatalMenu.addEventListener('click', hideMenuModal);
+menuForm.addEventListener('submit', simpanMenu);
+
+// Event listener untuk modal stok
+tombolTambahStok.addEventListener('click', () => showStokModal());
+modalBatalStok.addEventListener('click', hideStokModal);
+stokForm.addEventListener('submit', simpanStok);
+
+// Event listener untuk modal pengguna
+tombolTambahPengguna.addEventListener('click', () => showPenggunaModal());
+modalBatalPengguna.addEventListener('click', hidePenggunaModal);
+penggunaForm.addEventListener('submit', simpanPengguna);
 
 main();

@@ -10,25 +10,19 @@
 
     <link rel="stylesheet" href="styles.css" />
 
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </head>
 
-<!-- PERUBAHAN: Layout diubah menjadi flex-col dengan tinggi layar penuh -->
-
 <body class="bg-gray-100 h-screen flex flex-col">
 
-    <!-- Loading Overlay -->
     <div id="loading-overlay">
         <div class="spinner"></div>
         <p>Menghubungkan ke Database...</p>
     </div>
 
-    <!-- Kontainer Utama Aplikasi -->
     <div id="app" class="h-full flex flex-col">
-        <!-- ===== LAYAR LOGIN ===== -->
         <div id="layar-login" class="flex flex-col items-center justify-center h-full bg-gray-800">
             <div class="w-full max-w-sm mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8">
                 <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Selamat Datang</h1>
@@ -66,9 +60,7 @@
             <div class="text-white mt-4 text-sm">PIN Admin: 1111, Kasir: 2222, Dapur: 3333</div>
         </div>
 
-        <!-- ===== APLIKASI UTAMA (Setelah Login) ===== -->
         <div id="aplikasi-utama" class="hidden h-full flex flex-col">
-            <!-- PERUBAHAN: Header dibuat agar tidak menyusut (flex-shrink-0) -->
             <header class="bg-white shadow-md w-full p-4 flex justify-between items-center z-10 flex-shrink-0">
                 <div class="flex items-center">
                     <svg class="w-8 h-8 text-indigo-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -88,21 +80,16 @@
                         class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-3 md:px-4 rounded-lg transition duration-300">Logout</button>
                 </div>
             </header>
-            <!-- PERUBAHAN: Main content dibuat bisa scroll vertikal dan mengisi sisa ruang (flex-1) -->
             <main class="flex-1 overflow-y-auto">
 
-                <!-- ===== TAMPILAN KASIR (POS) ===== -->
                 <div id="tampilan-pos" class="hidden h-full">
-                    <!-- PERUBAHAN: Layout diubah menjadi 1 kolom di mobile, dan 3 di layar besar -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-4 md:p-6">
-                        <!-- Kolom Meja -->
                         <div class="bg-white rounded-2xl shadow-lg flex flex-col min-h-[400px] lg:min-h-0">
                             <h2 class="text-xl font-bold p-4 border-b">Pilih Meja</h2>
                             <div id="container-meja"
                                 class="p-4 grid grid-cols-3 sm:grid-cols-4 gap-4 overflow-y-auto no-scrollbar"></div>
                         </div>
 
-                        <!-- Kolom Menu -->
                         <div class="bg-white rounded-2xl shadow-lg flex flex-col min-h-[500px] lg:min-h-0">
                             <div class="p-4 border-b">
                                 <h2 class="text-xl font-bold">Menu</h2>
@@ -110,7 +97,6 @@
                             <div id="container-menu" class="p-4 overflow-y-auto no-scrollbar"></div>
                         </div>
 
-                        <!-- Kolom Pesanan -->
                         <div class="bg-white rounded-2xl shadow-lg flex flex-col min-h-[500px] lg:min-h-0">
                             <div class="p-4 border-b">
                                 <h2 class="text-xl font-bold">Pesanan: <span id="label-meja-aktif"
@@ -138,7 +124,6 @@
                     </div>
                 </div>
 
-                <!-- ===== TAMPILAN DAPUR ===== -->
                 <div id="tampilan-dapur" class="hidden h-full bg-gray-100 p-4 md:p-6">
                     <h2 class="text-3xl font-bold mb-6 text-gray-800">Pesanan Masuk</h2>
                     <div id="container-dapur"
@@ -148,13 +133,9 @@
                     </div>
                 </div>
 
-                <!-- ===== TAMPILAN ADMIN (BACKOFFICE) ===== -->
-                <!-- PERUBAHAN: Layout diubah jadi vertikal di mobile, horizontal di layar besar -->
                 <div id="tampilan-admin" class="hidden h-full flex flex-col lg:flex-row">
-                    <!-- PERUBAHAN: Navigasi dibuat lebar penuh di mobile, dan tetap di layar besar -->
                     <nav class="w-full lg:w-64 bg-gray-800 text-white flex-shrink-0">
                         <div class="p-6 text-2xl font-bold border-b border-gray-700 hidden lg:block">Backoffice</div>
-                        <!-- PERUBAHAN: Menu dibuat horizontal dan scrollable di mobile, vertikal di layar besar -->
                         <ul class="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible no-scrollbar">
                             <li><a href="#"
                                     class="admin-menu-item block py-3 px-6 hover:bg-gray-700 bg-gray-900 whitespace-nowrap"
@@ -167,8 +148,7 @@
                                     data-target="panel-pengguna">Manajemen Pengguna</a></li>
                         </ul>
                     </nav>
-                    <div class="flex-1 p-4 md:p-8 bg-white">
-                        <!-- Panel Laporan -->
+                    <div class="flex-1 p-4 md:p-8 bg-white overflow-y-auto">
                         <div id="panel-laporan" class="admin-panel">
                             <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Laporan Laba Rugi</h2>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -195,16 +175,21 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Panel Manajemen Menu -->
+                        
                         <div id="panel-menu" class="admin-panel hidden">
                             <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Manajemen Menu</h2>
-                            <!-- PERUBAHAN: Tabel dibungkus agar bisa scroll horizontal -->
+                            <div class="mb-4">
+                                <button id="tombol-tambah-menu" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                                    + Tambah Menu Baru
+                                </button>
+                            </div>
                             <div class="w-full overflow-x-auto bg-white shadow-md rounded-lg">
                                 <table class="min-w-full leading-normal">
                                     <thead>
                                         <tr>
                                             <th class="table-header">Kode</th>
                                             <th class="table-header">Nama Menu</th>
+                                            <th class="table-header">Kategori</th>
                                             <th class="table-header">Harga</th>
                                             <th class="table-header">Dapur</th>
                                             <th class="table-header">Aksi</th>
@@ -214,9 +199,14 @@
                                 </table>
                             </div>
                         </div>
-                        <!-- Panel Manajemen Stok -->
+
                         <div id="panel-stok" class="admin-panel hidden">
                             <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Manajemen Stok</h2>
+                             <div class="mb-4">
+                                <button id="tombol-tambah-stok" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                                    + Tambah Bahan Baku
+                                </button>
+                            </div>
                             <div class="w-full overflow-x-auto bg-white shadow-md rounded-lg">
                                 <table class="min-w-full leading-normal">
                                     <thead>
@@ -225,15 +215,20 @@
                                             <th class="table-header">Nama Bahan</th>
                                             <th class="table-header">Stok (g/ml)</th>
                                             <th class="table-header">Harga Beli Rata-rata (per g/ml)</th>
+                                            <th class="table-header">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tabel-stok"></tbody>
                                 </table>
                             </div>
                         </div>
-                        <!-- Panel Manajemen Pengguna -->
                         <div id="panel-pengguna" class="admin-panel hidden">
                             <h2 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Manajemen Pengguna</h2>
+                             <div class="mb-4">
+                                <button id="tombol-tambah-pengguna" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                                    + Tambah Pengguna Baru
+                                </button>
+                            </div>
                             <div class="w-full overflow-x-auto bg-white shadow-md rounded-lg">
                                 <table class="min-w-full leading-normal">
                                     <thead>
@@ -255,13 +250,115 @@
             </main>
         </div>
     </div>
+    
+    <div id="menu-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white">
+            <div class="mt-3">
+                <h3 id="modal-title-menu" class="text-2xl leading-6 font-bold text-gray-900 text-center">Judul Modal</h3>
+                <form id="menu-form" class="mt-4 space-y-4">
+                    <input type="hidden" id="menu-id">
+                    <div>
+                        <label for="menu-kode" class="block text-sm font-medium text-gray-700">Kode Menu</label>
+                        <input type="text" id="menu-kode" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="menu-nama" class="block text-sm font-medium text-gray-700">Nama Menu</label>
+                        <input type="text" id="menu-nama" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="menu-kategori" class="block text-sm font-medium text-gray-700">Kategori</label>
+                        <input type="text" id="menu-kategori" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="menu-harga" class="block text-sm font-medium text-gray-700">Harga</label>
+                        <input type="number" id="menu-harga" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="menu-dapur" class="block text-sm font-medium text-gray-700">Target Dapur</label>
+                        <input type="text" id="menu-dapur" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div class="items-center gap-4 pt-4 flex">
+                        <button id="modal-simpan-menu" type="submit" class="w-full bg-green-500 text-white p-3 rounded-lg font-bold hover:bg-green-600 transition">
+                            Simpan
+                        </button>
+                        <button id="modal-batal-menu" type="button" class="w-full bg-gray-200 text-gray-800 p-3 rounded-lg font-bold hover:bg-gray-300 transition">
+                            Batal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="stok-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white">
+            <div class="mt-3">
+                <h3 id="modal-title-stok" class="text-2xl leading-6 font-bold text-gray-900 text-center">Edit Bahan Baku</h3>
+                <form id="stok-form" class="mt-4 space-y-4">
+                    <input type="hidden" id="stok-id">
+                    <div>
+                        <label for="stok-nama" class="block text-sm font-medium text-gray-700">Nama Bahan Baku</label>
+                        <input type="text" id="stok-nama" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="stok-jumlah" class="block text-sm font-medium text-gray-700">Jumlah Stok (g/ml)</label>
+                        <input type="number" step="0.01" id="stok-jumlah" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="stok-harga-beli" class="block text-sm font-medium text-gray-700">Harga Beli (per g/ml)</label>
+                        <input type="number" step="0.01" id="stok-harga-beli" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div class="items-center gap-4 pt-4 flex">
+                        <button id="modal-simpan-stok" type="submit" class="w-full bg-green-500 text-white p-3 rounded-lg font-bold hover:bg-green-600 transition">
+                            Simpan
+                        </button>
+                        <button id="modal-batal-stok" type="button" class="w-full bg-gray-200 text-gray-800 p-3 rounded-lg font-bold hover:bg-gray-300 transition">
+                            Batal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="pengguna-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white">
+            <div class="mt-3">
+                <h3 id="modal-title-pengguna" class="text-2xl leading-6 font-bold text-gray-900 text-center">Edit Pengguna</h3>
+                <form id="pengguna-form" class="mt-4 space-y-4">
+                    <input type="hidden" id="pengguna-id">
+                    <div>
+                        <label for="pengguna-nama" class="block text-sm font-medium text-gray-700">Nama Pengguna</label>
+                        <input type="text" id="pengguna-nama" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="pengguna-peran" class="block text-sm font-medium text-gray-700">Peran</label>
+                        <select id="pengguna-peran" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="admin">Admin</option>
+                            <option value="kasir">Kasir</option>
+                            <option value="dapur">Dapur</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="pengguna-pin" class="block text-sm font-medium text-gray-700">PIN (4 digit)</label>
+                        <input type="text" id="pengguna-pin" required pattern="[0-9]{4}" title="PIN harus 4 digit angka" maxlength="4" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div class="items-center gap-4 pt-4 flex">
+                        <button id="modal-simpan-pengguna" type="submit" class="w-full bg-green-500 text-white p-3 rounded-lg font-bold hover:bg-green-600 transition">
+                            Simpan
+                        </button>
+                        <button id="modal-batal-pengguna" type="button" class="w-full bg-gray-200 text-gray-800 p-3 rounded-lg font-bold hover:bg-gray-300 transition">
+                            Batal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-    <!-- Firebase Config -->
+
     <script src="firebase-config.js"></script>
-    <!-- Firebase Logic -->
     <script type="module" src="firebase-logic.js"></script> 
 
-  
 </body>
-
 </html>
