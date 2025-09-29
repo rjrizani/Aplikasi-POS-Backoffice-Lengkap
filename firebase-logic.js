@@ -90,6 +90,15 @@ const tombolTambahPengguna = document.getElementById('tombol-tambah-pengguna');
 const modalBatalPengguna = document.getElementById('modal-batal-pengguna');
 const modalSimpanPengguna = document.getElementById('modal-simpan-pengguna');
 
+// Elemen DOM untuk Laporan
+const tombolFilterTanggal = document.getElementById('tombol-filter-tanggal');
+const tombolPrintLaporan = document.getElementById('tombol-print-laporan');
+const tombolExportCsv = document.getElementById('tombol-export-csv');
+const tanggalMulaiEl = document.getElementById('tanggal-mulai');
+const tanggalAkhirEl = document.getElementById('tanggal-akhir');
+const infoRentangTanggalEl = document.getElementById('info-rentang-tanggal');
+const tombolResetFilter = document.getElementById('tombol-reset-filter');
+
 // ===================================
 // FUNGSI HELPER
 // ===================================
@@ -207,17 +216,19 @@ function renderDapur() {
     }
 }
 
-function renderAdminPanels() {
+function renderAdminPanels(transaksiTersaring = null) {
+    const daftarTransaksi = transaksiTersaring !== null ? transaksiTersaring : localData.transaksi;
+
     // Laporan
     let totalPendapatan = 0;
     let totalHPP = 0;
     const detailTransaksiEl = document.getElementById('laporan-transaksi');
     detailTransaksiEl.innerHTML = '';
 
-    if (localData.transaksi.length === 0) {
-        detailTransaksiEl.innerHTML = '<p class="text-gray-500">Belum ada transaksi.</p>';
+    if (daftarTransaksi.length === 0) {
+        detailTransaksiEl.innerHTML = '<p class="text-gray-500">Tidak ada transaksi untuk ditampilkan.</p>';
     } else {
-        localData.transaksi.sort((a, b) => b.waktu.seconds - a.waktu.seconds).forEach(t => {
+        daftarTransaksi.sort((a, b) => b.waktu.seconds - a.waktu.seconds).forEach(t => {
             totalPendapatan += t.total;
             totalHPP += t.hpp;
             const waktu = t.waktu ? new Date(t.waktu.seconds * 1000).toLocaleString('id-ID') : 'N/A';
@@ -241,69 +252,69 @@ function renderAdminPanels() {
     document.getElementById('laporan-hpp').textContent = formatRupiah(totalHPP);
     document.getElementById('laporan-laba').textContent = formatRupiah(totalPendapatan - totalHPP);
 
+    // Render panel lain hanya jika data tidak difilter (untuk efisiensi)
+    if (transaksiTersaring === null) {
+        // Menu
+        const tabelMenuBody = document.getElementById('tabel-menu');
+        tabelMenuBody.innerHTML = '';
+        localData.menu.sort((a,b) => a.kode.localeCompare(b.kode)).forEach(m => {
+            tabelMenuBody.innerHTML += `
+                <tr>
+                    <td class="table-cell">${m.kode}</td>
+                    <td class="table-cell">${m.nama}</td>
+                    <td class="table-cell">${m.kategori}</td>
+                    <td class="table-cell text-right">${formatRupiah(m.harga)}</td>
+                    <td class="table-cell">${m.targetDapur}</td>
+                    <td class="table-cell">
+                        <button data-id="${m.id}" class="edit-menu-btn text-indigo-600 hover:text-indigo-900 font-semibold">Edit</button>
+                        <button data-id="${m.id}" class="hapus-menu-btn text-red-600 hover:text-red-900 font-semibold ml-4">Hapus</button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.querySelectorAll('.edit-menu-btn').forEach(btn => btn.onclick = () => showMenuModal(btn.dataset.id));
+        document.querySelectorAll('.hapus-menu-btn').forEach(btn => btn.onclick = () => hapusMenu(btn.dataset.id));
 
-    // Menu
-    const tabelMenuBody = document.getElementById('tabel-menu');
-    tabelMenuBody.innerHTML = '';
-    localData.menu.sort((a,b) => a.kode.localeCompare(b.kode)).forEach(m => {
-        tabelMenuBody.innerHTML += `
-            <tr>
-                <td class="table-cell">${m.kode}</td>
-                <td class="table-cell">${m.nama}</td>
-                <td class="table-cell">${m.kategori}</td>
-                <td class="table-cell text-right">${formatRupiah(m.harga)}</td>
-                <td class="table-cell">${m.targetDapur}</td>
-                <td class="table-cell">
-                    <button data-id="${m.id}" class="edit-menu-btn text-indigo-600 hover:text-indigo-900 font-semibold">Edit</button>
-                    <button data-id="${m.id}" class="hapus-menu-btn text-red-600 hover:text-red-900 font-semibold ml-4">Hapus</button>
-                </td>
-            </tr>
-        `;
-    });
-    
-    document.querySelectorAll('.edit-menu-btn').forEach(btn => btn.onclick = () => showMenuModal(btn.dataset.id));
-    document.querySelectorAll('.hapus-menu-btn').forEach(btn => btn.onclick = () => hapusMenu(btn.dataset.id));
+        // Stok
+        const tabelStokBody = document.getElementById('tabel-stok');
+        tabelStokBody.innerHTML = '';
+        localData.bahanBaku.sort((a,b) => a.nama.localeCompare(b.nama)).forEach(bb => {
+            tabelStokBody.innerHTML += `
+                <tr>
+                    <td class="table-cell">${bb.id}</td>
+                    <td class="table-cell">${bb.nama}</td>
+                    <td class="table-cell text-right">${bb.stok.toFixed(2)}</td>
+                    <td class="table-cell text-right">${formatRupiah(bb.hargaBeliPerGram)}</td>
+                    <td class="table-cell">
+                        <button data-id="${bb.id}" class="edit-stok-btn text-indigo-600 hover:text-indigo-900 font-semibold">Edit</button>
+                        <button data-id="${bb.id}" class="hapus-stok-btn text-red-600 hover:text-red-900 font-semibold ml-4">Hapus</button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.querySelectorAll('.edit-stok-btn').forEach(btn => btn.onclick = () => showStokModal(btn.dataset.id));
+        document.querySelectorAll('.hapus-stok-btn').forEach(btn => btn.onclick = () => hapusStok(btn.dataset.id));
 
-    // Render Tabel Stok
-    const tabelStokBody = document.getElementById('tabel-stok');
-    tabelStokBody.innerHTML = '';
-    localData.bahanBaku.sort((a,b) => a.nama.localeCompare(b.nama)).forEach(bb => {
-        tabelStokBody.innerHTML += `
-            <tr>
-                <td class="table-cell">${bb.id}</td>
-                <td class="table-cell">${bb.nama}</td>
-                <td class="table-cell text-right">${bb.stok.toFixed(2)}</td>
-                <td class="table-cell text-right">${formatRupiah(bb.hargaBeliPerGram)}</td>
-                <td class="table-cell">
-                     <button data-id="${bb.id}" class="edit-stok-btn text-indigo-600 hover:text-indigo-900 font-semibold">Edit</button>
-                    <button data-id="${bb.id}" class="hapus-stok-btn text-red-600 hover:text-red-900 font-semibold ml-4">Hapus</button>
-                </td>
-            </tr>
-        `;
-    });
-    document.querySelectorAll('.edit-stok-btn').forEach(btn => btn.onclick = () => showStokModal(btn.dataset.id));
-    document.querySelectorAll('.hapus-stok-btn').forEach(btn => btn.onclick = () => hapusStok(btn.dataset.id));
-
-
-    // Render Tabel Pengguna
-    const tabelPenggunaBody = document.getElementById('tabel-pengguna');
-    tabelPenggunaBody.innerHTML = '';
-    localData.pengguna.sort((a,b) => a.nama.localeCompare(b.nama)).forEach(p => {
-        tabelPenggunaBody.innerHTML += `
-            <tr>
-                <td class="table-cell">${p.id}</td>
-                <td class="table-cell">${p.nama}</td>
-                <td class="table-cell capitalize">${p.peran}</td>
-                <td class="table-cell">${p.pin}</td>
-                <td class="table-cell">
-                    <button data-id="${p.id}" class="edit-pengguna-btn text-indigo-600 hover:text-indigo-900 font-semibold">Edit</button>
-                    <button data-id="${p.id}" class="hapus-pengguna-btn text-red-600 hover:text-red-900 font-semibold ml-4">Hapus</button>
-                </td>
-            </tr>
-        `;
-    });
-    document.querySelectorAll('.edit-pengguna-btn').forEach(btn => btn.onclick = () => showPenggunaModal(btn.dataset.id));
-    document.querySelectorAll('.hapus-pengguna-btn').forEach(btn => btn.onclick = () => hapusPengguna(btn.dataset.id));
+        // Pengguna
+        const tabelPenggunaBody = document.getElementById('tabel-pengguna');
+        tabelPenggunaBody.innerHTML = '';
+        localData.pengguna.sort((a,b) => a.nama.localeCompare(b.nama)).forEach(p => {
+            tabelPenggunaBody.innerHTML += `
+                <tr>
+                    <td class="table-cell">${p.id}</td>
+                    <td class="table-cell">${p.nama}</td>
+                    <td class="table-cell capitalize">${p.peran}</td>
+                    <td class="table-cell">${p.pin}</td>
+                    <td class="table-cell">
+                        <button data-id="${p.id}" class="edit-pengguna-btn text-indigo-600 hover:text-indigo-900 font-semibold">Edit</button>
+                        <button data-id="${p.id}" class="hapus-pengguna-btn text-red-600 hover:text-red-900 font-semibold ml-4">Hapus</button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.querySelectorAll('.edit-pengguna-btn').forEach(btn => btn.onclick = () => showPenggunaModal(btn.dataset.id));
+        document.querySelectorAll('.hapus-pengguna-btn').forEach(btn => btn.onclick = () => hapusPengguna(btn.dataset.id));
+    }
 }
 
 // ===================================
@@ -321,15 +332,17 @@ async function attachRealtimeListeners() {
             localData[collName] = data;
 
             if (penggunaAktif) {
-                switch (collName) {
-                    case 'meja': renderMeja(); renderPesanan(); break;
-                    case 'menu': 
-                        renderMenu(); 
-                        if (penggunaAktif.peran === 'admin') renderAdminPanels();
+                switch (penggunaAktif.peran) {
+                    case 'kasir':
+                        if (['meja', 'menu'].includes(collName)) {
+                           renderMeja(); renderMenu(); renderPesanan();
+                        }
                         break;
-                    case 'pesananDapur': if(penggunaAktif.peran === 'dapur') renderDapur(); break;
-                    case 'pengguna': case 'bahanBaku': case 'transaksi':
-                        if (penggunaAktif.peran === 'admin') renderAdminPanels();
+                    case 'dapur':
+                        if (collName === 'pesananDapur') renderDapur();
+                        break;
+                    case 'admin':
+                        renderAdminPanels();
                         break;
                 }
             }
@@ -432,7 +445,8 @@ async function kurangiItemDariPesanan(idMenu) {
                     newPesanan.splice(itemIndex, 1);
                 }
             }
-            transaction.update(mejaDocRef, { pesanan: newPesanan });
+            const status_meja = newPesanan.length > 0 ? 'memesan' : 'tersedia';
+            transaction.update(mejaDocRef, { pesanan: newPesanan, status: status_meja });
         });
     } catch (e) { console.error("Gagal mengurangi item: ", e); }
 }
@@ -784,6 +798,116 @@ async function hapusPengguna(id) {
     }
 }
 
+// FUNGSI BARU UNTUK LAPORAN
+function filterTransaksiByDate() {
+    const mulai = tanggalMulaiEl.value;
+    const akhir = tanggalAkhirEl.value;
+
+    if (!mulai || !akhir) {
+        alert("Silakan pilih tanggal mulai dan tanggal akhir.");
+        return;
+    }
+
+    const startOfDay = new Date(mulai);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(akhir);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const startTimestamp = startOfDay.getTime() / 1000;
+    const endTimestamp = endOfDay.getTime() / 1000;
+
+    const transaksiTersaring = localData.transaksi.filter(t => {
+        return t.waktu.seconds >= startTimestamp && t.waktu.seconds <= endTimestamp;
+    });
+
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    infoRentangTanggalEl.textContent = `Menampilkan transaksi dari ${startOfDay.toLocaleDateString('id-ID', options)} hingga ${endOfDay.toLocaleDateString('id-ID', options)}.`;
+    
+    renderAdminPanels(transaksiTersaring);
+}
+
+function resetFilterLaporan() {
+    tanggalMulaiEl.value = '';
+    tanggalAkhirEl.value = '';
+    infoRentangTanggalEl.textContent = 'Menampilkan semua transaksi.';
+    renderAdminPanels();
+}
+
+function printLaporan() {
+    const judulLaporan = "Laporan Transaksi";
+    const tanggalFilter = infoRentangTanggalEl.textContent;
+    const pendapatan = document.getElementById('laporan-pendapatan').textContent;
+    const hpp = document.getElementById('laporan-hpp').textContent;
+    const laba = document.getElementById('laporan-laba').textContent;
+
+    const printWindow = window.open('', '', 'height=600,width=800');
+    printWindow.document.write('<html><head><title>Laporan Transaksi</title>');
+    printWindow.document.write('<style>body{font-family:sans-serif; margin: 20px;} table{width:100%; border-collapse:collapse;} th,td{border:1px solid #ddd; padding:8px; text-align:left;} h1,h2,h3{text-align:center;} .summary{display:flex; justify-content:space-around; margin: 20px 0; padding: 10px; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc;}</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(`<h1>${judulLaporan}</h1>`);
+    printWindow.document.write(`<h2>${tanggalFilter}</h2>`);
+    printWindow.document.write(`
+        <div class="summary">
+            <div><strong>Total Pendapatan:</strong> ${pendapatan}</div>
+            <div><strong>Total HPP:</strong> ${hpp}</div>
+            <div><strong>Laba Kotor:</strong> ${laba}</div>
+        </div>
+    `);
+    printWindow.document.write('<h3>Detail Transaksi</h3>');
+    
+    const transaksiContainer = document.getElementById('laporan-transaksi').cloneNode(true);
+    let tableHtml = '<table><thead><tr><th>Info Transaksi</th><th>Nominal</th></tr></thead><tbody>';
+    transaksiContainer.querySelectorAll('.flex').forEach(div => {
+        const info = div.children[0].innerHTML.replace(/<p/g, '<div').replace(/<\/p>/g, '</div>');
+        const nominal = div.children[1].innerHTML.replace(/<p/g, '<div').replace(/<\/p>/g, '</div>');
+        tableHtml += `<tr><td>${info}</td><td>${nominal}</td></tr>`;
+    });
+    tableHtml += '</tbody></table>';
+
+    printWindow.document.write(tableHtml);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
+}
+
+
+function exportToCsv() {
+    const mulai = tanggalMulaiEl.value || "awal";
+    const akhir = tanggalAkhirEl.value || "akhir";
+    const transaksiTersaring = (!tanggalMulaiEl.value || !tanggalAkhirEl.value) 
+        ? localData.transaksi 
+        : localData.transaksi.filter(t => {
+            const startTimestamp = new Date(tanggalMulaiEl.value).setHours(0,0,0,0) / 1000;
+            const endTimestamp = new Date(tanggalAkhirEl.value).setHours(23,59,59,999) / 1000;
+            return t.waktu.seconds >= startTimestamp && t.waktu.seconds <= endTimestamp;
+        });
+
+    if (transaksiTersaring.length === 0) {
+        alert("Tidak ada data transaksi untuk diekspor.");
+        return;
+    }
+    
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "ID Transaksi,Waktu,Nama Meja,Subtotal,Pajak,Total,HPP\r\n"; // Header
+
+    transaksiTersaring.forEach(t => {
+        const id = t.id.substring(0, 6);
+        const waktu = new Date(t.waktu.seconds * 1000).toLocaleString('id-ID');
+        const row = [id, `"${waktu}"`, t.namaMeja, t.subtotal, t.pajak, t.total, t.hpp].join(",");
+        csvContent += row + "\r\n";
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `laporan_transaksi_${mulai}_sd_${akhir}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Sisa fungsi (updatePinDisplay, handlePinInput, main, setupInitialData)
 function updatePinDisplay() {
     pinDisplay.textContent = '●'.repeat(pinSaatIni.length);
 }
@@ -846,6 +970,7 @@ async function setupInitialData() {
     }
 }
 
+// EVENT LISTENERS
 pinButtons.forEach(button => button.addEventListener('click', () => handlePinInput(button.dataset.value)));
 pinClear.addEventListener('click', () => { pinSaatIni = ''; updatePinDisplay(); });
 pinBackspace.addEventListener('click', () => { pinSaatIni = pinSaatIni.slice(0, -1); updatePinDisplay(); });
@@ -877,4 +1002,11 @@ tombolTambahPengguna.addEventListener('click', () => showPenggunaModal());
 modalBatalPengguna.addEventListener('click', hidePenggunaModal);
 penggunaForm.addEventListener('submit', simpanPengguna);
 
+// Event listener untuk Laporan
+tombolFilterTanggal.addEventListener('click', filterTransaksiByDate);
+tombolResetFilter.addEventListener('click', resetFilterLaporan);
+tombolPrintLaporan.addEventListener('click', printLaporan);
+tombolExportCsv.addEventListener('click', exportToCsv);
+
 main();
+
